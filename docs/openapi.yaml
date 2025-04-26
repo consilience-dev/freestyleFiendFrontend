@@ -1,0 +1,235 @@
+openapi: 3.0.3
+info:
+  title: FreestyleFiend API
+  version: 1.0.0
+  description: |
+    REST API for FreestyleFiend. All endpoints (except GET /beats, GET /leaderboard, GET /recordings) require Cognito JWT in the Authorization header.
+servers:
+  - url: https://<api-id>.execute-api.us-east-1.amazonaws.com/prod
+security:
+  - CognitoAuth: []
+components:
+  securitySchemes:
+    CognitoAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Recording:
+      type: object
+      properties:
+        recordingId: { type: string }
+        userId: { type: string }
+        beatId: { type: string }
+        artistName: { type: string }
+        title: { type: string }
+        s3Key: { type: string }
+        createdAt: { type: string, format: date-time }
+        explicit: { type: boolean }
+        fireRating: { type: number }
+        voteCount: { type: integer }
+        playCount: { type: integer }
+    Vote:
+      type: object
+      properties:
+        userId:
+          type: string
+        recordingId:
+          type: string
+        voteValue:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    LeaderboardEntry:
+      type: object
+      properties:
+        recordingId: { type: string }
+        artistName: { type: string }
+        fireRating: { type: number }
+        voteCount: { type: integer }
+        playCount: { type: integer }
+        timeFrame: { type: string, enum: [day, week, month, all] }
+    Beat:
+      type: object
+      properties:
+        beatId: { type: string }
+        title: { type: string }
+        producer: { type: string }
+        genre: { type: string }
+        bpm: { type: integer }
+        duration: { type: string }
+        tags: { type: array, items: { type: string } }
+        description: { type: string }
+        audioUrl: { type: string, description: "Presigned S3 URL for audio file" }
+        imageUrl: { type: string, description: "Presigned S3 URL for cover image" }
+        s3Key: { type: string }
+        createdAt: { type: string, format: date-time }
+paths:
+  /recordings:
+    post:
+      summary: Upload new freestyle recording metadata
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recording'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recordingId: { type: string }
+                  presignedUrl: { type: string }
+        '400': { description: Invalid input }
+        '401': { description: Unauthorized }
+    get:
+      summary: List freestyle recordings
+      parameters:
+        - in: query
+          name: beatId
+          schema: { type: string }
+        - in: query
+          name: artistName
+          schema: { type: string }
+        - in: query
+          name: explicit
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: List of recordings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recording'
+  /recordings/{id}:
+    get:
+      summary: Get a specific recording
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Recording found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recording'
+        '404': { description: Not found }
+  /votes:
+    post:
+      summary: Submit a vote for a recording
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - recordingId
+                - voteValue
+              properties:
+                recordingId:
+                  type: string
+                  description: Recording ID to vote on
+                voteValue:
+                  type: integer
+                  enum: [1, -1]
+                  description: 1 for upvote, -1 for downvote
+      responses:
+        '201':
+          description: Vote recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+    get:
+      summary: List votes for a recording
+      parameters:
+        - in: query
+          name: recordingId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of votes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vote'
+        '400':
+          description: Missing recordingId
+  /leaderboard:
+    get:
+      summary: Get top-rated freestyle recordings
+      description: |
+        Returns the top N recordings for a given date (default: today, format YYYYMMDD).
+      parameters:
+        - in: query
+          name: date
+          required: false
+          schema:
+            type: string
+            pattern: "^\\d{8}$"
+            example: "20250424"
+          description: Date in YYYYMMDD format. If omitted, uses today (UTC).
+      responses:
+        '200':
+          description: Leaderboard for the date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  topRecordings:
+                    type: array
+                    items:
+                      type: string
+                  generatedAt:
+                    type: string
+                    format: date-time
+        '405':
+          description: Method not allowed
+  # TODO: Revisit this section with backend team if needed
+  /beats:
+    get:
+      summary: List available beats
+      description: Returns all available beats with metadata and presigned S3 URLs for audio and image.
+      responses:
+        '200':
+          description: List of beats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Beat'

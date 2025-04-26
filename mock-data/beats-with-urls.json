@@ -1,0 +1,109 @@
+[
+  {
+    "beatId": "celestial",
+    "title": "Celestial",
+    "producer": "FreeBeats.io",
+    "genre": "Hip-Hop",
+    "bpm": 163,
+    "duration": "3:24",
+    "s3Key": "beats/celestial.mp3",
+    "imageKey": "beats/images/celestial.png",
+    "tags": [
+      "Atmospheric",
+      "Chill",
+      "Vibe"
+    ],
+    "description": "Chill, atmospheric hip-hop beat.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/celestial.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/celestial.png"
+  },
+  {
+    "beatId": "move-in-silence",
+    "title": "Move In Silence",
+    "producer": "FreeBeats.io",
+    "genre": "Trap",
+    "bpm": 128,
+    "duration": "3:35",
+    "s3Key": "beats/move-in-silence.mp3",
+    "imageKey": "beats/images/move-in-silence.png",
+    "tags": [
+      "Atmospheric",
+      "Contemplative"
+    ],
+    "description": "Contemplative trap instrumental.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/move-in-silence.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/move-in-silence.png"
+  },
+  {
+    "beatId": "havoc",
+    "title": "Havoc",
+    "producer": "FreeBeats.io",
+    "genre": "Trap",
+    "bpm": 144,
+    "duration": "3:07",
+    "s3Key": "beats/havoc.mp3",
+    "imageKey": "beats/images/havoc.png",
+    "tags": [
+      "Bass",
+      "Bells",
+      "Synth"
+    ],
+    "description": "Bass-heavy trap beat with bells and synths.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/havoc.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/havoc.png"
+  },
+  {
+    "beatId": "hood-life",
+    "title": "Hood Life",
+    "producer": "FreeBeats.io",
+    "genre": "Hip-Hop",
+    "bpm": 140,
+    "duration": "2:53",
+    "s3Key": "beats/hood-life.mp3",
+    "imageKey": "beats/images/hood-life.png",
+    "tags": [
+      "Gritty",
+      "Street",
+      "Urban"
+    ],
+    "description": "Gritty street hip-hop beat.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/hood-life.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/hood-life.png"
+  },
+  {
+    "beatId": "one-love",
+    "title": "One Love",
+    "producer": "FreeBeats.io",
+    "genre": "Hip-Hop",
+    "bpm": 87,
+    "duration": "2:48",
+    "s3Key": "beats/one-love.mp3",
+    "imageKey": "beats/images/one-love.png",
+    "tags": [
+      "Old School",
+      "Nostalgic",
+      "Piano"
+    ],
+    "description": "Old school piano-driven hip-hop beat.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/one-love.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/one-love.png"
+  },
+  {
+    "beatId": "secrets",
+    "title": "Secrets",
+    "producer": "FreeBeats.io",
+    "genre": "R&B",
+    "bpm": 136,
+    "duration": "3:45",
+    "s3Key": "beats/secrets.mp3",
+    "imageKey": "beats/images/secrets.png",
+    "tags": [
+      "Smooth",
+      "Saxophone",
+      "R&B"
+    ],
+    "description": "Smooth R&B beat with saxophone.",
+    "audioUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/secrets.mp3",
+    "imageUrl": "https://cdk-hnb659fds-assets-909300772959-us-east-1.s3.us-east-1.amazonaws.com/beats/images/secrets.png"
+  }
+]

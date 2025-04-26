@@ -1,0 +1,129 @@
+# AI Assistant Instructions
+
+When assisting with this project, the AI must:
+
+1. Strictly follow coding standards and architectural guidelines outlined below.
+2. Proactively detect and suggest corrections when deviations are observed.
+3. Clearly explain the reasoning behind architectural or code decisions when relevant.
+4. Always prioritize security, scalability, maintainability, and developer experience.
+5. Ensure all produced code includes proper error handling.
+6. Generate automated tests for all components and logic, runnable via command line (e.g., `npm test`, `pnpm test`).
+7. Update the README with clear, concise information whenever project behavior, setup, or dependencies change.
+8. Confirm that integration tests and E2E tests are considered in each major feature.
+
+# Architectural Foundations
+
+Solutions must align with:
+
+- Component-driven development.
+- API-first design (strong contracts between backend and frontend).
+- Mobile-first responsive design.
+- Accessibility best practices (WCAG 2.1 AA compliance where feasible).
+- SEO and performance optimization (especially for Next.js projects).
+- Minimal coupling; clear separation of concerns.
+
+# Technology Stack
+
+- Framework: Next.js 14+
+- Language: TypeScript
+- Styling: TailwindCSS
+- UI Components: shadcn/ui
+- State Management: Zustand (or TanStack Query if API-heavy)
+- Forms & Validation: react-hook-form + zod
+- Testing:
+  - Unit: Vitest
+  - E2E: Playwright
+- Deployment: Vercel (preferred) or AWS Amplify
+- CI/CD: GitHub Actions
+- Package Manager: pnpm preferred (fallback to npm)
+
+# Coding Standards
+
+- Use functional React components with hooks.
+- Prefer Server Components where feasible (in Next.js).
+- Use Tailwind utility classes; avoid excessive custom CSS.
+- Error boundaries should wrap major dynamic components.
+- Form submissions must include validation (client + server side).
+- Include docstrings for custom hooks and utilities.
+- Organize code using atomic design principles (atoms, molecules, organisms).
+- Keep file and folder structures flat and predictable.
+- Always type all props and responses explicitly.
+
+# AI Behavior Guidelines
+
+- Anticipate points of failure; always add try/catch or error boundaries.
+- Avoid “happy path only” coding; consider edge cases and fallback states.
+- Scaffold tests immediately for new features (no feature code without a test).
+- If adding CLI commands or workflows, ensure they are easily scriptable.
+- Keep README.md updated after significant changes, especially:
+  - Setup instructions
+  - New environment variables
+  - Major architecture shifts
+  - Deployment changes
+
+# Safeguards
+
+- Do not hardcode secrets, API keys, or environment-specific values in source files.
+- Assume multi-environment deployment (dev, staging, prod).
+- Optimize bundle size and runtime wherever possible (e.g., dynamic imports, tree-shaking).
+
+# Developer Alignment & Knowledge Check
+
+Before introducing, suggesting, or implementing features involving the following technologies:
+
+- WCAG Accessibility Guidelines (WCAG 2.1+)
+- SEO best practices in Next.js
+- Next.js 14 (especially Server Components, App Router)
+- Zustand (state management)
+- TanStack Query (server state management)
+- zod (schema validation)
+- vitest (unit testing framework)
+- playwright (end-to-end testing framework)
+
+The AI must:
+
+1. Pause and engage the developer with a brief explanation (2-3 sentences) of the tool's purpose and why it’s being used.
+2. Offer examples or analogies if appropriate.
+3. Ask if the developer would like a deeper walkthrough or example usage before proceeding.
+4. Confirm understanding before finalizing any implementation involving these technologies.
+5. If the developer opts out or is unfamiliar, suggest simpler alternatives when possible.
+
+The AI must always prioritize developer confidence and mutual understanding over tool complexity or trendiness.
+
+# Vibe-Recursion and Intelligent Looping Workflows
+
+When managing project workflows involving tests, deployments, or build steps, the AI must:
+
+1. Enable autonomous recursive behavior where appropriate, such as:
+   - Running integration tests
+   - Deploying updates (e.g., CDK deploy, Vercel deploy)
+   - Re-running tests post-deploy
+2. Implement loop logic:
+   - Continue cycling through “test → deploy → test” until success criteria are met (e.g., all tests passing).
+   - Include safeguards:
+     - Maximum retry limits (default 3)
+     - Timeout protection
+     - Clear reporting after each cycle
+3. Treat the successful passing of all tests as the base case to exit the loop.
+4. If persistent failures occur:
+   - Halt looping after retries
+   - Summarize failure reasons
+   - Suggest remediation steps
+5. Ensure that all looped workflows can be run headlessly (no manual confirmation needed unless explicitly configured).
+
+# Developer Control
+
+- The developer must be able to easily start, stop, or configure loop settings.
+- If manual intervention is needed (e.g., a critical prompt), the AI must clearly surface it.
+
+The goal is to maintain a natural development “flow state” where feedback cycles are automated, fast, and low-friction — the "vibe."
+
+# Audio Recording & Playback Guidelines
+
+- Utilize the Web Audio API to handle audio operations within an `AudioContext`, allowing modular routing and real-time processing.
+- Use `navigator.mediaDevices.getUserMedia()` to access the user's microphone for recording.
+- Implement `MediaRecorder` to capture audio streams, ensuring compatibility across browsers.
+- For advanced audio processing, consider using `AudioWorklet` to run custom audio processing scripts on a separate thread.
+- Ensure that audio playback and recording are synchronized, allowing users to record their verses over the beat seamlessly.
+- Provide users with controls to play, pause, and stop recordings, as well as to manage volume and playback position.
+- Store recordings in a suitable format (e.g., WAV, MP3) and provide options for users to download or share their recordings.

@@ -1,0 +1,43 @@
+{
+  "scripts": {
+    "generate:openapi-types": "openapi-typescript docs/openapi.yaml -o types/openapi.d.ts",
+    "dev": "next dev",
+    "test": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@shadcn/ui": "^0.0.4",
+    "@tailwindcss/postcss": "^4.1.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.15.2",
+    "@types/react": "^19.1.2",
+    "autoprefixer": "^10.4.21",
+    "jsdom": "^26.1.0",
+    "next": "^15.3.1",
+    "openapi-fetch": "^0.13.5",
+    "openapi-typescript": "^7.6.1",
+    "postcss": "^8.5.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.1",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2",
+    "zod": "^3.24.3",
+    "zustand": "^5.0.3"
+  },
+  "dependencies": {
+    "@aws-amplify/auth": "^6.12.3",
+    "@aws-amplify/core": "^6.11.3",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-slot": "^1.2.0",
+    "aws-amplify": "^6.14.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "rxjs": "^7.8.2",
+    "tailwind-merge": "^3.2.0"
+  }
+}
