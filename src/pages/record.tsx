@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { BeatsGallery } from "@/components/BeatsGallery";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
@@ -671,7 +672,7 @@ export default function RecordPage() {
   }, [cleanupAudioEngine]);
   
   const handleSaveRecording = async () => {
-    if (!recordingState.audioBlob || !selectedBeat || !authState.user) {
+    if (!recordingState.audioBlob || !selectedBeat) {
       setRecordingState(prev => ({
         ...prev,
         error: 'Missing required data to save recording'
@@ -694,11 +695,23 @@ export default function RecordPage() {
     }));
 
     try {
+      // Get the authentication token
+      const session = await fetchAuthSession();
+      // Try using the ID token instead of the access token
+      const token = session.tokens?.idToken?.toString() || session.tokens?.accessToken?.toString();
+      
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
+      console.log('Using token for authentication (first 10 chars):', token.substring(0, 10) + '...');
+      
       // First, create the recording metadata in the backend
       const response = await fetch('/api/recordings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           beatId: selectedBeat,
@@ -718,13 +731,17 @@ export default function RecordPage() {
 
       console.log(`Uploading recording to presigned URL: ${presignedUrl}`);
 
-      // Now upload the audio file to the presigned URL
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: recordingState.audioBlob,
+      // Now upload the audio file through our API to avoid CORS issues
+      const formData = new FormData();
+      formData.append('audioFile', recordingState.audioBlob, 'recording.webm');
+      formData.append('presignedUrl', presignedUrl);
+      
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'audio/webm',
+          'Authorization': `Bearer ${token}`
         },
+        body: formData,
       });
 
       if (!uploadResponse.ok) {
@@ -952,6 +969,7 @@ export default function RecordPage() {
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
+                    gap: '0.5rem'
                   }}>
                     <input
                       id="force-mono"
@@ -959,7 +977,6 @@ export default function RecordPage() {
                       checked={forceMono}
                       onChange={(e) => setForceMono(e.target.checked)}
                       style={{
-                        marginRight: '0.5rem',
                         width: '1.25rem',
                         height: '1.25rem'
                       }}

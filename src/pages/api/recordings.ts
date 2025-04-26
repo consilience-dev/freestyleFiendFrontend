@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getAccessToken } from '@/lib/auth';
 
 interface RecordingResponse {
   recordingId: string;
@@ -20,11 +19,15 @@ export default async function handler(
   }
 
   try {
-    // Get JWT token - this endpoint requires authentication
-    const token = await getAccessToken();
+    // Get JWT token from the Authorization header sent by the client
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.split(' ')[1] : null;
+    
+    console.log('Auth header received:', authHeader ? 'Present (length: ' + authHeader.length + ')' : 'Missing');
+    console.log('Token extracted:', token ? 'Present (length: ' + token.length + ')' : 'Missing');
     
     if (!token) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return res.status(401).json({ message: 'Unauthorized - No token provided' });
     }
     
     // Get request data
@@ -42,6 +45,18 @@ export default async function handler(
     }
     
     console.log(`Creating recording at ${apiBaseUrl}/recordings`);
+    
+    // Add more detailed logging of the request
+    console.log('Request headers:', {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token.substring(0, 10)}...` : 'Missing token'
+    });
+    console.log('Request body:', {
+      beatId,
+      title,
+      artistName,
+      explicit: explicit === true
+    });
     
     // Call the backend API to create recording metadata
     const response = await fetch(`${apiBaseUrl}/recordings`, {
@@ -61,6 +76,8 @@ export default async function handler(
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Recording API error response:', errorText);
+      console.error('Response status:', response.status);
+      console.error('Response headers:', Object.fromEntries([...response.headers.entries()]));
       throw new Error(`Error creating recording: ${response.status}`);
     }
     
