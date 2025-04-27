@@ -16,13 +16,14 @@ Amplify.configure({
   }
 });
 
-// Function to get the current access token
+// Function to get the current token for API authentication
 export async function getAccessToken(): Promise<string | null> {
   try {
     const session = await fetchAuthSession();
-    return session.tokens?.accessToken?.toString() || null;
+    // Try ID token first (like recording page does), then fall back to access token
+    return session.tokens?.idToken?.toString() || session.tokens?.accessToken?.toString() || null;
   } catch (error) {
-    console.error('Error fetching access token:', error);
+    console.error('Error fetching authentication token:', error);
     return null;
   }
 }
