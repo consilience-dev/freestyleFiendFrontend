@@ -100,7 +100,7 @@ export default function RecordPage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Maximum recording duration in seconds
-  const MAX_RECORDING_DURATION = 300; // 5 minutes
+  const MAX_RECORDING_DURATION = 30; // 30 seconds
   
   // Check if user is on mobile
   useEffect(() => {
@@ -1191,7 +1191,7 @@ export default function RecordPage() {
                 }}>
                   {recordingState.phase === 'recording' 
                     ? `Recording will automatically stop in ${MAX_RECORDING_DURATION - recordingState.duration} seconds` 
-                    : `Recordings are limited to ${MAX_RECORDING_DURATION} seconds`}
+                    : `Recordings are limited to 30 seconds`}
                 </p>
                 
                 {/* Audio player for preview */}

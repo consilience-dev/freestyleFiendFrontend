@@ -350,13 +350,42 @@ export default function VotePage() {
       return;
     }
     
-    // If we have a significant horizontal swipe, complete the action
+    // If we have a significant horizontal swipe, complete the action with animation
     if (swiping === 'right' && recordings[currentIndex]) {
-      handleVote(recordings[currentIndex].id, 'up');
+      // For right swipe (upvote) - add extra animation before handling vote
+      const card = cardRef.current;
+      if (card) {
+        card.style.transition = 'transform 0.5s ease-out';
+        card.style.transform = `translateX(${window.innerWidth}px) rotate(${Math.min(swipePosition.x * 0.1, 30)}deg)`;
+        
+        // Delay the vote handling to allow animation to complete
+        setTimeout(() => {
+          handleVote(recordings[currentIndex].id, 'up');
+        }, 300);
+      } else {
+        handleVote(recordings[currentIndex].id, 'up');
+      }
     } else if (swiping === 'left' && recordings[currentIndex]) {
-      handleVote(recordings[currentIndex].id, 'down');
+      // For left swipe (downvote) - add extra animation before handling vote
+      const card = cardRef.current;
+      if (card) {
+        card.style.transition = 'transform 0.5s ease-out';
+        card.style.transform = `translateX(-${window.innerWidth}px) rotate(${Math.max(swipePosition.x * 0.1, -30)}deg)`;
+        
+        // Delay the vote handling to allow animation to complete
+        setTimeout(() => {
+          handleVote(recordings[currentIndex].id, 'down');
+        }, 300);
+      } else {
+        handleVote(recordings[currentIndex].id, 'down');
+      }
     } else {
-      // Reset position if swipe wasn't far enough
+      // Reset position if swipe wasn't far enough - add springy animation
+      const card = cardRef.current;
+      if (card) {
+        card.style.transition = 'transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; // Bouncy effect
+        card.style.transform = 'translateX(0) rotate(0deg)';
+      }
       setSwiping('none');
       setSwipePosition({ x: 0, y: 0 });
     }
@@ -822,12 +851,18 @@ export default function VotePage() {
                   position: 'relative',
                   transform: `rotate(${swiping !== 'none' ? (swiping === 'left' ? Math.min(swipePosition.x * -0.05, 0) : Math.max(swipePosition.x * 0.05, 0)) : 0}deg) 
                               translateX(${swiping !== 'none' ? swipePosition.x : 0}px)`,
-                  transition: swiping === 'none' ? 'all 0.3s ease-out' : 'none',
+                  transition: swiping === 'none' ? 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
                   border: '1px solid rgba(147, 51, 234, 0.2)',
                   boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                  touchAction: 'pan-y', // Allow vertical scrolling but capture horizontal
                 }}
                 onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseLeave}
                 onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               >
                 {/* Recording image */}
                 <div style={{
@@ -871,13 +906,23 @@ export default function VotePage() {
                       justifyContent: 'center',
                       opacity: Math.min(Math.abs(swipePosition.x) / 100, 1),
                       transition: 'opacity 0.2s',
+                      borderRadius: '0.75rem',
+                      border: `${Math.min(Math.abs(swipePosition.x) / 50, 4)}px solid rgba(239, 68, 68, 0.8)`, // Growing border with swipe
                     }}>
                       <span style={{ 
                         fontSize: '2rem', 
                         fontWeight: 'bold',
                         color: 'white',
                         textShadow: '0 2px 5px rgba(0,0,0,0.3)',
-                      }}>NOPE</span>
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.5rem'
+                      }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 5v14M5 12l7 7 7-7"/>
+                        </svg>
+                        Not Fire
+                      </span>
                     </div>
                   )}
                   
@@ -894,13 +939,23 @@ export default function VotePage() {
                       justifyContent: 'center',
                       opacity: Math.min(Math.abs(swipePosition.x) / 100, 1),
                       transition: 'opacity 0.2s',
+                      borderRadius: '0.75rem',
+                      border: `${Math.min(Math.abs(swipePosition.x) / 50, 4)}px solid rgba(16, 185, 129, 0.8)`, // Growing border with swipe
                     }}>
                       <span style={{ 
                         fontSize: '2rem', 
                         fontWeight: 'bold',
                         color: 'white',
                         textShadow: '0 2px 5px rgba(0,0,0,0.3)',
-                      }}>FIRE!</span>
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '0.5rem'
+                      }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
+                        Fire
+                      </span>
                     </div>
                   )}
                 </div>
@@ -977,10 +1032,10 @@ export default function VotePage() {
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
                       onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5v14M5 12l7 7 7-7"/>
                       </svg>
-                      <span>Skip</span>
+                      <span>Not Fire</span>
                     </button>
                     
                     <button
@@ -999,15 +1054,14 @@ export default function VotePage() {
                         gap: '0.5rem',
                         cursor: 'pointer',
                         fontWeight: 500,
-                        transition: 'all 0.2s',
                       }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7e22ce'}
                       onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9333ea'}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 19V5M5 12l7-7 7 7"/>
                       </svg>
-                      <span>Upvote</span>
+                      <span>Fire</span>
                     </button>
                   </div>
                 </div>
@@ -1021,7 +1075,7 @@ export default function VotePage() {
                 fontSize: '0.875rem',
               }}>
                 <p>
-                  Swipe right to upvote, left to skip
+                  Swipe right to mark as Fire, left to mark as Not Fire
                 </p>
                 <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: 'rgba(255, 255, 255, 0.4)' }}>
                   {currentIndex + 1} of {recordings.length} recordings
@@ -1060,8 +1114,8 @@ export default function VotePage() {
             margin: '0 auto',
             lineHeight: '1.6',
           }}>
-            <li>Swipe right or tap <span style={{ color: '#9333ea' }}>↑</span> to like a freestyle</li>
-            <li>Swipe left or tap <span style={{ fontWeight: 'bold' }}>Skip</span> to dislike a freestyle</li>
+            <li>Swipe right or tap <b>Fire</b> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: 'inline', verticalAlign: 'middle'}}><path d="M12 19V5M5 12l7-7 7 7"/></svg> to like a freestyle</li>
+            <li>Swipe left or tap <b>Not Fire</b> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: 'inline', verticalAlign: 'middle'}}><path d="M12 5v14M5 12l7 7 7-7"/></svg> to dislike a freestyle</li>
             <li>Listen to the full recording before voting</li>
             <li>Top-rated freestyles appear on the leaderboard</li>
           </ul>
