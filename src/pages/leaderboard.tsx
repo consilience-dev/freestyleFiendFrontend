@@ -3,8 +3,9 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
 import { Recording, LeaderboardFilters } from '@/types/recordings';
-import { useAuth } from '@/lib/auth';
+import { useAuth, signOut } from '@/lib/auth';
 import AudioPlayer from '@/components/AudioPlayer';
+import Link from 'next/link';
 
 // Array of vibrant gradient backgrounds for placeholder images
 const PLACEHOLDER_BACKGROUNDS = [
@@ -111,22 +112,134 @@ export default function LeaderboardPage() {
   const handlePlayRecording = (recordingId: string) => {
     setPlayingRecordingId(recordingId);
   };
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <>
       <Head>
         <title>Freestyle Leaderboard - FreestyleFiend</title>
         <meta name="description" content="Check out the top freestyles from the community" />
+        <style>{`
+          body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          
+          a {
+            color: inherit;
+            text-decoration: none;
+          }
+          
+          @keyframes progressPulse {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+          }
+        `}</style>
       </Head>
       
+      {/* Custom Header */}
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '16px 20px',
+        borderBottom: '1px solid #333',
+        backgroundColor: '#0f0f0f'
+      }}>
+        <Link 
+          href="/"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            color: '#9333ea' 
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 8C13.66 8 15 9.34 15 11V17C15 18.66 13.66 20 12 20C10.34 20 9 18.66 9 17V11C9 9.34 10.34 8 12 8ZM18 12C18 15.31 15.31 18 12 18V16C14.21 16 16 14.21 16 12H18Z" fill="currentColor" />
+          </svg>
+          <span style={{ 
+            marginLeft: '8px', 
+            fontWeight: 'bold' 
+          }}>
+            FreestyleFiend
+          </span>
+        </Link>
+
+        <div>
+          {authState.isAuthenticated ? (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Link 
+                href="/profile" 
+                style={{ marginRight: '16px' }}
+              >
+                Profile
+              </Link>
+              <button 
+                onClick={handleSignOut}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div>
+              <Link 
+                href="/signin"
+                style={{
+                  marginRight: '8px',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/signup"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+      </header>
+      
       <main style={{
-        padding: '2rem 1rem',
-        backgroundColor: '#3b0764',
+        backgroundColor: '#0f0f0f',
         minHeight: 'calc(100vh - 60px)',
       }}>
         <div style={{
           maxWidth: '72rem',
           margin: '0 auto',
+          padding: '2rem 1rem',
         }}>
           <div style={{
             display: 'flex',
@@ -148,7 +261,7 @@ export default function LeaderboardPage() {
             <button
               onClick={() => router.push('/vote')}
               style={{
-                backgroundColor: '#db2777',
+                backgroundColor: '#9333ea',
                 color: 'white',
                 border: 'none',
                 borderRadius: '0.5rem',
@@ -161,8 +274,8 @@ export default function LeaderboardPage() {
                 cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#be185d'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#db2777'}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7e22ce'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9333ea'}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 12l2 2 4-4"/>
@@ -193,7 +306,7 @@ export default function LeaderboardPage() {
           }}>
             <div style={{
               display: 'flex',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              border: '1px solid rgba(147, 51, 234, 0.3)',
               borderRadius: '0.5rem',
               overflow: 'hidden',
             }}>
@@ -204,11 +317,11 @@ export default function LeaderboardPage() {
                   style={{
                     padding: '0.5rem 1rem',
                     backgroundColor: filters.timeFrame === timeFrame 
-                      ? 'rgba(219, 39, 119, 0.8)' 
-                      : 'rgba(255, 255, 255, 0.1)',
+                      ? 'rgba(147, 51, 234, 0.8)' 
+                      : 'rgba(255, 255, 255, 0.05)',
                     color: 'white',
                     border: 'none',
-                    borderRight: timeFrame !== 'all' ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+                    borderRight: timeFrame !== 'all' ? '1px solid rgba(147, 51, 234, 0.2)' : 'none',
                     cursor: 'pointer',
                     transition: 'background-color 0.2s',
                     fontWeight: filters.timeFrame === timeFrame ? 600 : 400,
@@ -228,8 +341,8 @@ export default function LeaderboardPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.5rem 1rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(147, 51, 234, 0.3)',
                 borderRadius: '0.5rem',
                 color: 'white',
                 cursor: 'pointer',
@@ -238,7 +351,7 @@ export default function LeaderboardPage() {
               <span style={{
                 width: '1.25rem',
                 height: '1.25rem',
-                backgroundColor: filters.explicit ? 'rgba(219, 39, 119, 0.8)' : 'transparent',
+                backgroundColor: filters.explicit ? 'rgba(147, 51, 234, 0.8)' : 'transparent',
                 border: '2px solid rgba(255, 255, 255, 0.5)',
                 borderRadius: '0.25rem',
                 display: 'inline-block',
@@ -275,9 +388,9 @@ export default function LeaderboardPage() {
               <div style={{
                 width: '2rem',
                 height: '2rem',
-                border: '4px solid rgba(255, 255, 255, 0.3)',
+                border: '4px solid rgba(147, 51, 234, 0.3)',
                 borderRadius: '50%',
-                borderTopColor: 'white',
+                borderTopColor: '#9333ea',
                 animation: 'spin 1s linear infinite',
               }}></div>
             </div>
@@ -286,12 +399,15 @@ export default function LeaderboardPage() {
               textAlign: 'center',
               padding: '3rem 0',
               color: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(147, 51, 234, 0.05)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(147, 51, 234, 0.2)',
             }}>
               <p style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>No freestyles found for this time period.</p>
               <button
                 onClick={() => router.push('/record')}
                 style={{
-                  backgroundColor: '#db2777', 
+                  backgroundColor: '#9333ea', 
                   color: 'white',
                   border: 'none',
                   padding: '0.75rem 1.5rem',
@@ -318,19 +434,29 @@ export default function LeaderboardPage() {
                     <div
                       key={recording.id}
                       style={{
-                        backgroundColor: 'rgba(107, 33, 168, 0.5)', 
-                        borderRadius: '0.5rem',
-                        padding: '1rem',
+                        backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                        borderRadius: '0.75rem',
+                        padding: '1.25rem',
                         display: 'flex',
                         flexDirection: isMobile ? 'column' : 'row',
                         gap: '1rem',
                         alignItems: isMobile ? 'flex-start' : 'center',
+                        border: '1px solid rgba(147, 51, 234, 0.2)',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(147, 51, 234, 0.15)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
                       <div style={{
                         width: '2.5rem',
                         height: '2.5rem',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: 'rgba(147, 51, 234, 0.2)',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -338,6 +464,7 @@ export default function LeaderboardPage() {
                         fontWeight: 'bold',
                         fontSize: '1.25rem',
                         flexShrink: 0,
+                        color: index < 3 ? '#9333ea' : 'rgba(255, 255, 255, 0.8)',
                       }}>
                         {index + 1}
                       </div>
@@ -453,10 +580,10 @@ export default function LeaderboardPage() {
                         {hoveredImageId === recording.id && (
                           <div style={{
                             position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
+                            top: '0',
+                            left: '0',
+                            right: '0',
+                            bottom: '0',
                             backgroundColor: 'rgba(0, 0, 0, 0.3)',
                             display: 'flex',
                             alignItems: 'center',
@@ -495,70 +622,148 @@ export default function LeaderboardPage() {
                           </h3>
                           {recording.explicit && (
                             <span style={{
-                              backgroundColor: 'rgba(219, 39, 119, 0.8)', 
+                              backgroundColor: 'rgba(147, 51, 234, 0.8)', 
                               color: 'white',
                               padding: '0.125rem 0.375rem',
                               borderRadius: '0.25rem',
-                              fontSize: '0.75rem',
-                              fontWeight: 500,
+                              fontSize: '0.6875rem',
+                              fontWeight: 600,
+                              letterSpacing: '0.05em',
                             }}>
-                              E
+                              EXPLICIT
                             </span>
                           )}
                         </div>
                         <p style={{
                           fontSize: '0.875rem',
-                          color: 'rgba(255, 255, 255, 0.8)',
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          marginBottom: '0.75rem',
                         }}>
-                          by {recording.artistName}
-                          {recording.beatName && ` • Beat: ${recording.beatName}`}
+                          by <span style={{ color: 'rgba(147, 51, 234, 0.8)' }}>{recording.artistName}</span>
+                          {recording.beatName && <span> • Beat: {recording.beatName}</span>}
                         </p>
+                        
+                        {/* Audio player bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <button
+                            onClick={() => handlePlayRecording(recording.id)}
+                            style={{
+                              width: '2.5rem',
+                              height: '2.5rem',
+                              borderRadius: '50%',
+                              backgroundColor: playingRecordingId === recording.id 
+                                ? 'rgba(147, 51, 234, 0.9)' 
+                                : 'rgba(147, 51, 234, 0.6)',
+                              color: 'white',
+                              border: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s',
+                              flexShrink: 0,
+                            }}
+                            aria-label={playingRecordingId === recording.id ? "Pause" : "Play"}
+                          >
+                            <svg 
+                              width="18" 
+                              height="18" 
+                              viewBox="0 0 24 24"
+                              fill="white"
+                            >
+                              {playingRecordingId === recording.id ? (
+                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                              ) : (
+                                <path d="M8 5v14l11-7z" />
+                              )}
+                            </svg>
+                          </button>
+                          
+                          {playingRecordingId === recording.id && (
+                            <div style={{ flex: 1, position: 'relative' }}>
+                              <AudioPlayer 
+                                src={recording.audioUrl} 
+                                title={recording.title}
+                                artist={recording.artistName}
+                                onError={() => setPlayingRecordingId(null)}
+                              />
+                            </div>
+                          )}
+                          
+                          {playingRecordingId !== recording.id && (
+                            <div style={{ 
+                              flex: 1,
+                              height: '4px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                              borderRadius: '2px',
+                              position: 'relative',
+                            }}>
+                              <div style={{
+                                position: 'absolute',
+                                left: '0',
+                                top: '0',
+                                bottom: '0',
+                                width: '100%',
+                                pointerEvents: 'none',
+                                borderRadius: '2px',
+                                opacity: '0.1',
+                                background: 'linear-gradient(to right, #9333ea, #4f46e5)',
+                              }} />
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
-                      {/* Audio player */}
-                      <div style={{ 
-                        width: '100%',
-                        maxWidth: isMobile ? '100%' : '350px',
-                      }}>
-                        <AudioPlayer 
-                          src={recording.audioUrl} 
-                          title={recording.title}
-                          artist={recording.artistName}
-                          onError={() => console.error(`Error loading audio for recording ${recording.id}`)}
-                          className="audio-player"
-                        />
-                      </div>
-                      
-                      {/* Display votes only */}
+                      {/* Upvote counter */}
                       <div style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
+                        justifyContent: 'center',
+                        marginLeft: isMobile ? '0' : '1rem',
+                        marginTop: isMobile ? '1rem' : '0',
+                        alignSelf: isMobile ? 'flex-end' : 'center',
                       }}>
-                        {/* Votes display (not interactive) */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                          padding: '0.25rem 0.5rem',
-                          borderRadius: '0.25rem',
-                        }}>
+                        {recording.votes >= 0 ? (
                           <svg 
-                            width="16" 
-                            height="16" 
                             viewBox="0 0 24 24" 
+                            width="24" 
+                            height="24" 
+                            stroke="#9333ea"
+                            strokeWidth="2" 
                             fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2"
                             strokeLinecap="round" 
                             strokeLinejoin="round"
+                            style={{
+                              marginBottom: '0.25rem',
+                            }}
                           >
                             <path d="M12 19V5M5 12l7-7 7 7"/>
                           </svg>
-                          <span style={{ fontWeight: 600 }}>
-                            {recording.votes}
-                          </span>
-                        </div>
+                        ) : (
+                          <svg 
+                            viewBox="0 0 24 24" 
+                            width="24" 
+                            height="24" 
+                            stroke="#ef4444"
+                            strokeWidth="2" 
+                            fill="none" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                            style={{
+                              marginBottom: '0.25rem',
+                            }}
+                          >
+                            <path d="M12 5v14M5 12l7 7 7-7"/>
+                          </svg>
+                        )}
+                        <span style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: 'bold',
+                          color: recording.votes > 0 ? '#9333ea' : recording.votes < 0 ? '#ef4444' : 'rgba(255, 255, 255, 0.5)',
+                        }}>
+                          {Math.abs(recording.votes)}
+                        </span>
                       </div>
                     </div>
                   );
@@ -568,17 +773,16 @@ export default function LeaderboardPage() {
           )}
         </div>
       </main>
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
+      
+      <style jsx global>{`
         @keyframes spin {
-          to { transform: rotate(360deg); }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-        @keyframes progressPulse {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(400%); }
+        
+        @keyframes fadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
         }
       `}</style>
     </>

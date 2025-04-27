@@ -1,5 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Auth, Hub } from 'aws-amplify';
+import { Amplify } from 'aws-amplify';
+import { 
+  signIn as amplifySignIn, 
+  signUp as amplifySignUp, 
+  confirmSignUp as amplifyConfirmSignUp, 
+  signOut as amplifySignOut, 
+  resetPassword as amplifyResetPassword, 
+  confirmResetPassword as amplifyConfirmResetPassword, 
+  fetchAuthSession, 
+  getCurrentUser
+} from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import { 
   AuthState, 
   User, 
@@ -47,10 +58,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Check if user is authenticated
-  const checkAuthState = async () => {
+  const checkAuthStatus = async () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const cognitoUser = await Auth.currentAuthenticatedUser();
+      const cognitoUser = await getCurrentUser();
       const formattedUser = formatUser(cognitoUser);
       setAuthState({
         isAuthenticated: true,
@@ -72,21 +83,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = async (data: SignUpData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await Auth.signUp({
+      const signUpInput = {
         username: data.username,
         password: data.password,
-        attributes: {
-          email: data.email,
-          ...(data.name ? { name: data.name } : {}),
-        },
-      });
+        options: {
+          userAttributes: {
+            email: data.email,
+            ...(data.name && { name: data.name }),
+          }
+        }
+      };
+      
+      await amplifySignUp(signUpInput);
       setAuthState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during sign up') 
-      }));
+      console.error('Sign up error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
@@ -95,45 +107,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const confirmSignUp = async (data: ConfirmSignUpData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await Auth.confirmSignUp(data.username, data.code);
+      const confirmSignUpInput = {
+        username: data.username,
+        confirmationCode: data.code,
+      };
+      
+      await amplifyConfirmSignUp(confirmSignUpInput);
       setAuthState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during confirmation') 
-      }));
+      console.error('Confirm sign up error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
 
-  // Sign in a user
+  // Sign in an existing user
   const signIn = async (data: SignInData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      const cognitoUser = await Auth.signIn(data.username, data.password);
-      const formattedUser = formatUser(cognitoUser);
-      setAuthState({
-        isAuthenticated: true,
-        isLoading: false,
-        user: formattedUser,
-        error: null,
-      });
+      const signInInput = {
+        username: data.username,
+        password: data.password,
+      };
+      
+      await amplifySignIn(signInInput);
+      await checkAuthStatus();
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during sign in') 
-      }));
+      console.error('Sign in error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
 
   // Sign out the current user
-  const signOut = async () => {
+  const handleSignOut = async () => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await Auth.signOut();
+      await amplifySignOut();
       setAuthState({
         isAuthenticated: false,
         isLoading: false,
@@ -141,81 +151,80 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error: null,
       });
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during sign out') 
-      }));
+      console.error('Sign out error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
 
-  // Request a password reset
+  // Trigger password reset for a user
   const forgotPassword = async (data: ForgotPasswordData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await Auth.forgotPassword(data.username);
+      const resetPasswordInput = {
+        username: data.username,
+      };
+      
+      await amplifyResetPassword(resetPasswordInput);
       setAuthState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during password reset request') 
-      }));
+      console.error('Password reset error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
 
-  // Confirm new password with verification code
+  // Confirm password reset with verification code and new password
   const confirmForgotPassword = async (data: ConfirmForgotPasswordData) => {
     try {
       setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-      await Auth.forgotPasswordSubmit(data.username, data.code, data.newPassword);
+      const confirmResetPasswordInput = {
+        username: data.username,
+        confirmationCode: data.code,
+        newPassword: data.newPassword,
+      };
+      
+      await amplifyConfirmResetPassword(confirmResetPasswordInput);
       setAuthState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
-      setAuthState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error instanceof Error ? error : new Error('An unknown error occurred during password reset confirmation') 
-      }));
+      console.error('Confirm password reset error:', error);
+      setAuthState(prev => ({ ...prev, isLoading: false, error: error as Error }));
       throw error;
     }
   };
 
-  // Listen for authentication events
+  // Listen for auth events
   useEffect(() => {
-    // Check auth state on mount
-    checkAuthState();
+    // Initialize the auth state
+    checkAuthStatus();
 
-    // Set up listener for auth events
-    const unsubscribe = Hub.listen('auth', ({ payload: { event, data } }) => {
-      switch (event) {
+    // Listen for auth events from Amplify
+    const listener = (data: any) => {
+      console.log('Auth event:', data.payload.event);
+      
+      switch (data.payload.event) {
         case 'signIn':
-          setAuthState({
-            isAuthenticated: true,
-            isLoading: false,
-            user: formatUser(data),
-            error: null,
-          });
+          checkAuthStatus();
           break;
         case 'signOut':
           setAuthState({
-            isAuthenticated: false,
+            ...initialAuthState,
             isLoading: false,
-            user: null,
-            error: null,
           });
-          break;
-        case 'tokenRefresh':
-          checkAuthState();
           break;
         default:
           break;
       }
-    });
+    };
 
-    // Clean up listener on unmount
-    return () => unsubscribe();
+    Hub.listen('auth', listener);
+    
+    // In Amplify v6, we use the returned function to unsubscribe
+    return () => {
+      // Use the newer pattern for v6 to unsubscribe
+      const unsubscribe = Hub.listen('auth', () => {});
+      unsubscribe();
+    };
   }, []);
 
   // Authentication context value with state and methods
@@ -224,7 +233,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signUp,
     confirmSignUp,
     signIn,
-    signOut,
+    signOut: handleSignOut,
     forgotPassword,
     confirmForgotPassword,
   };

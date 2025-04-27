@@ -2,9 +2,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { BeatsGallery } from "@/components/BeatsGallery";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
+import { signOut } from "aws-amplify/auth";
 import { fetchAuthSession } from "aws-amplify/auth";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 // More specific recording state with well-defined phases
 interface RecordingState {
@@ -116,9 +118,10 @@ export default function RecordPage() {
   // Update beat volume when it changes in the UI
   useEffect(() => {
     const engine = audioEngineRef.current;
+    
+    // Smoothly transition gain changes
     if (engine.beatGain && engine.context?.state === 'running') {
       try {
-        // Smoothly transition gain changes
         engine.beatGain.gain.linearRampToValueAtTime(
           beatVolume / 100,
           engine.context.currentTime + 0.1 // Ramp over 0.1 seconds
@@ -342,7 +345,7 @@ export default function RecordPage() {
       // 2. ALWAYS create a new Audio element for each recording session
       // This is crucial to avoid the "already connected" error
       engine.beatPlayer = new Audio();
-      engine.beatPlayer.crossOrigin = 'anonymous';
+      engine.beatPlayer.crossOrigin = 'anonymous'; // This is critical for processing audio from S3
       engine.beatPlayer.preload = 'auto';
       console.log('Created new Audio element for beat playback');
       
@@ -779,27 +782,150 @@ export default function RecordPage() {
   return (
     <ProtectedRoute>
       <Head>
-        <title>{selectedBeat ? "Record Your Freestyle" : "Select a Beat"} - FreestyleFiend</title>
-        <meta name="description" content="Record your freestyle rap over beats" />
+        <title>Record a Freestyle - FreestyleFiend</title>
+        <meta name="description" content="Record your freestyle over premium beats" />
+        <style>{`
+          body {
+            background-color: #0f0f0f;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          
+          a {
+            color: inherit;
+            text-decoration: none;
+          }
+          
+          @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </Head>
       
+      {/* Custom Header */}
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '16px 20px',
+        borderBottom: '1px solid #333',
+        backgroundColor: '#0f0f0f'
+      }}>
+        <Link 
+          href="/"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            color: '#9333ea' 
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 8C13.66 8 15 9.34 15 11V17C15 18.66 13.66 20 12 20C10.34 20 9 18.66 9 17V11C9 9.34 10.34 8 12 8ZM18 12C18 15.31 15.31 18 12 18V16C14.21 16 16 14.21 16 12H18Z" fill="currentColor" />
+          </svg>
+          <span style={{ 
+            marginLeft: '8px', 
+            fontWeight: 'bold' 
+          }}>
+            FreestyleFiend
+          </span>
+        </Link>
+
+        <div>
+          {authState.isAuthenticated ? (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Link 
+                href="/profile" 
+                style={{ marginRight: '16px' }}
+              >
+                Profile
+              </Link>
+              <button 
+                onClick={async () => {
+                  try {
+                    await signOut();
+                    router.push('/');
+                  } catch (error) {
+                    console.error('Error signing out:', error);
+                  }
+                }}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div>
+              <Link 
+                href="/signin"
+                style={{
+                  marginRight: '8px',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/signup"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+      </header>
+
       <main style={{ 
-        minHeight: '100vh', 
-        backgroundColor: '#4c1d95' // purple-900 equivalent
+        minHeight: 'calc(100vh - 60px)', 
+        backgroundColor: '#0f0f0f', 
+        color: 'white',
+        padding: '2rem 1rem' 
       }}>
         <div style={{ 
           maxWidth: '72rem', // max-w-6xl equivalent
           margin: '0 auto',
-          padding: '2.5rem 1rem'
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>
           {successMessage && (
             <div style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.2)', // green with opacity
+              backgroundColor: 'rgba(34, 197, 94, 0.1)', // green with opacity
               color: 'white',
               padding: '1rem',
               borderRadius: '0.5rem',
               marginBottom: '1.5rem',
-              textAlign: 'center'
+              textAlign: 'center',
+              border: '1px solid rgba(34, 197, 94, 0.2)',
+              maxWidth: '500px',
+              margin: '0 auto 1.5rem'
             }}>
               {successMessage}
             </div>
@@ -807,39 +933,35 @@ export default function RecordPage() {
           
           {recordingState.error && (
             <div style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.2)', // red with opacity
+              backgroundColor: 'rgba(239, 68, 68, 0.1)', // red with opacity
               color: 'white',
               padding: '1rem',
               borderRadius: '0.5rem',
               marginBottom: '1.5rem',
-              textAlign: 'center'
+              textAlign: 'center',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              maxWidth: '500px',
+              margin: '0 auto 1.5rem'
             }}>
               {recordingState.error}
             </div>
           )}
           
-          <h1 style={{
-            fontSize: '1.875rem',
-            fontWeight: 700,
-            color: 'white',
-            textAlign: 'center',
-            marginBottom: '2rem'
-          }}>
-            {selectedBeat ? "Record Your Freestyle" : "Select a Beat"}
-          </h1>
-          
+          {/* Removed redundant "Select a Beat" header */}
+
           {!selectedBeat ? (
             // Step 1: Select a beat
             <BeatsGallery onSelectBeat={handleSelectBeat} />
           ) : (
             // Step 2: Recording interface
             <div style={{
-              backgroundColor: 'rgba(107, 33, 168, 0.5)', // purple-800 with opacity
-              borderRadius: '1rem',
+              backgroundColor: 'rgba(17, 17, 17, 0.8)',
+              borderRadius: '0.75rem',
               padding: '2rem',
               color: 'white',
               maxWidth: '36rem', // max-w-2xl equivalent
               margin: '0 auto',
+              border: '1px solid rgba(147, 51, 234, 0.2)',
             }}>
               <h2 style={{
                 fontSize: '1.5rem',
@@ -858,6 +980,7 @@ export default function RecordPage() {
                   backgroundColor: 'rgba(0, 0, 0, 0.2)',
                   padding: '1rem',
                   borderRadius: '0.5rem',
+                  border: '1px solid rgba(147, 51, 234, 0.1)',
                 }}>
                   <h3 style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
                     Beat: {beatDetails.title}
@@ -865,14 +988,6 @@ export default function RecordPage() {
                   <p style={{ fontSize: '0.875rem', opacity: 0.8, marginBottom: '0.5rem' }}>
                     by {beatDetails.producer}
                   </p>
-                  
-                  {/* Hidden element removed - we now create Audio element in code */}
-                  {/* <audio 
-                    ref={beatPlayerElementRef}
-                    preload="auto"
-                    crossOrigin="anonymous"
-                    style={{ display: 'none' }}
-                  /> */}
                   
                   {/* Beat volume control */}
                   <div style={{ width: '100%', marginTop: '0.75rem' }}>
@@ -894,11 +1009,10 @@ export default function RecordPage() {
                         min="0"
                         max="100"
                         value={beatVolume}
-                        // FIX: Directly set state, useEffect handles gain node update
                         onChange={(e) => setBeatVolume(parseInt(e.target.value))}
                         style={{
                           width: '100%',
-                          accentColor: '#db2777',
+                          accentColor: '#9333ea',
                         }}
                       />
                     </div>
@@ -922,6 +1036,7 @@ export default function RecordPage() {
                   backgroundColor: 'rgba(0, 0, 0, 0.2)',
                   padding: '1rem',
                   borderRadius: '0.5rem',
+                  border: '1px solid rgba(147, 51, 234, 0.1)',
                 }}>
                   <h3 style={{ 
                     fontWeight: 600, 
@@ -1023,7 +1138,7 @@ export default function RecordPage() {
                       onClick={startRecording}
                       disabled={!beatDetails || recordingState.phase === 'preparing' || recordingState.phase === 'processing'}
                       style={{
-                        backgroundColor: '#db2777', // pink-600
+                        backgroundColor: '#9333ea', // Our purple accent color
                         color: 'white',
                         border: 'none',
                         borderRadius: '9999px', // rounded-full
@@ -1102,11 +1217,11 @@ export default function RecordPage() {
                   }}>
                     Save Your Freestyle
                   </h3>
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSaveRecording();
-                    }}
+                  
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSaveRecording();
+                  }}
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
@@ -1123,7 +1238,7 @@ export default function RecordPage() {
                           color: 'rgba(255, 255, 255, 0.8)'
                         }}
                       >
-                        Title
+                        Title *
                       </label>
                       <input
                         id="title"
@@ -1131,20 +1246,22 @@ export default function RecordPage() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
+                        maxLength={50}
                         style={{
                           width: '100%',
                           padding: '0.75rem',
-                          borderRadius: '0.375rem',
                           border: '1px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: '0.375rem',
+                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
                           color: 'white',
                           fontSize: '1rem'
                         }}
-                        placeholder="Name your freestyle"
+                        placeholder="Give your freestyle a name"
                       />
                     </div>
                     
-                    <div style={{
+                    <div style={{ 
+                      marginBottom: '1.5rem',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.5rem'
@@ -1159,47 +1276,24 @@ export default function RecordPage() {
                           height: '1.25rem'
                         }}
                       />
-                      <label htmlFor="explicit">
-                        Contains explicit content
+                      <label htmlFor="explicit" style={{ fontSize: '0.875rem' }}>
+                        Mark as explicit content
                       </label>
                     </div>
                     
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      marginTop: '1rem'
-                    }}>
-                      <button
-                        type="button"
-                        onClick={discardRecording}
-                        style={{
-                          flex: '1',
-                          padding: '0.75rem',
-                          borderRadius: '0.375rem',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          fontWeight: 500
-                        }}
-                      >
-                        Discard
-                      </button>
-                      
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !title}
                         style={{
-                          flex: '1',
-                          padding: '0.75rem',
-                          borderRadius: '0.375rem',
-                          border: 'none',
-                          backgroundColor: '#db2777', // pink-600
+                          backgroundColor: '#9333ea',
                           color: 'white',
-                          cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                          border: 'none',
+                          padding: '0.75rem 1.5rem',
+                          borderRadius: '0.375rem',
+                          cursor: isSubmitting || !title ? 'not-allowed' : 'pointer',
+                          fontWeight: 'bold',
                           fontSize: '0.875rem',
-                          fontWeight: 500,
                           opacity: isSubmitting ? 0.7 : 1
                         }}
                       >

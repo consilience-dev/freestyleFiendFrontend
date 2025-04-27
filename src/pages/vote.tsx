@@ -4,7 +4,9 @@ import Head from 'next/head';
 import { Recording } from '@/types/recordings';
 import { useAuth } from '@/lib/auth';
 import { getAccessToken } from '@/lib/auth';
+import { signOut } from 'aws-amplify/auth';
 import AudioPlayer from '@/components/AudioPlayer';
+import Link from 'next/link';
 
 // Reuse the same placeholder generation logic from leaderboard.tsx
 const PLACEHOLDER_BACKGROUNDS = [
@@ -54,6 +56,16 @@ export default function VotePage() {
   const [allRecordingsVoted, setAllRecordingsVoted] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const touchActive = useRef(false);
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   // Load data for the vote page in proper sequence
   const loadVotePageData = async () => {
@@ -403,33 +415,143 @@ export default function VotePage() {
         <Head>
           <title>Vote on Freestyles - FreestyleFiend</title>
           <meta name="description" content="Vote on the best freestyles from the community" />
+          <style>{`
+            body {
+              background-color: #0f0f0f;
+              color: #fff;
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+            }
+            
+            a {
+              color: inherit;
+              text-decoration: none;
+            }
+            
+            @keyframes fadeIn {
+              0% { opacity: 0; }
+              100% { opacity: 1; }
+            }
+            
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
         </Head>
+        
+        {/* Custom Header */}
+        <header style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          padding: '16px 20px',
+          borderBottom: '1px solid #333',
+          backgroundColor: '#0f0f0f'
+        }}>
+          <Link 
+            href="/"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              color: '#9333ea' 
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 8C13.66 8 15 9.34 15 11V17C15 18.66 13.66 20 12 20C10.34 20 9 18.66 9 17V11C9 9.34 10.34 8 12 8ZM18 12C18 15.31 15.31 18 12 18V16C14.21 16 16 14.21 16 12H18Z" fill="currentColor" />
+            </svg>
+            <span style={{ 
+              marginLeft: '8px', 
+              fontWeight: 'bold' 
+            }}>
+              FreestyleFiend
+            </span>
+          </Link>
+
+          <div>
+            {authState.isAuthenticated ? (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <Link 
+                  href="/profile" 
+                  style={{ marginRight: '16px' }}
+                >
+                  Profile
+                </Link>
+                <button 
+                  onClick={handleSignOut}
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #444',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div>
+                <Link 
+                  href="/signin"
+                  style={{
+                    marginRight: '8px',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  href="/signup"
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid #444',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    fontSize: '14px'
+                  }}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+        </header>
+        
         <main style={{
-          padding: '2rem 1rem',
           minHeight: 'calc(100vh - 60px)',
+          backgroundColor: '#0f0f0f',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, #4c1d95 0%, #2e1065 100%)',
+          padding: '2rem 1rem',
         }}>
           <div style={{
             maxWidth: '600px',
             width: '100%',
-            backgroundColor: 'rgba(76, 29, 149, 0.6)',
-            borderRadius: '1rem',
+            backgroundColor: 'rgba(17, 17, 17, 0.8)',
+            borderRadius: '0.75rem',
             padding: '2rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+            border: '1px solid rgba(147, 51, 234, 0.2)',
+            textAlign: 'center',
           }}>
-            <h1 style={{ marginBottom: '1.5rem' }}>All Done!</h1>
+            <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>All Done!</h1>
             <p style={{ fontSize: '1.125rem', marginBottom: '2rem' }}>
               You've voted on all available recordings.
             </p>
-            <button
-              onClick={handleRefreshClick}
+            <Link 
+              href="/"
               style={{
-                backgroundColor: '#4f46e5',
+                backgroundColor: '#9333ea',
                 color: 'white',
                 border: 'none',
                 padding: '0.75rem 1.5rem',
@@ -437,15 +559,21 @@ export default function VotePage() {
                 fontSize: '1rem',
                 fontWeight: 'bold',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s',
+                textDecoration: 'none',
+                display: 'inline-block',
               }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
             >
-              Refresh Recordings
-            </button>
+              Go Home
+            </Link>
           </div>
         </main>
+        
+        <style jsx global>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </>
     );
   }
@@ -455,10 +583,114 @@ export default function VotePage() {
       <Head>
         <title>Vote on Freestyles - FreestyleFiend</title>
         <meta name="description" content="Vote on your favorite freestyle performances" />
+        <style>{`
+          body {
+            background-color: #0f0f0f;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          
+          a {
+            color: inherit;
+            text-decoration: none;
+          }
+          
+          @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </Head>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '16px 20px',
+        borderBottom: '1px solid #333',
+        backgroundColor: '#0f0f0f'
+      }}>
+        <Link href="/">
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            color: '#9333ea' 
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 8C13.66 8 15 9.34 15 11V17C15 18.66 13.66 20 12 20C10.34 20 9 18.66 9 17V11C9 9.34 10.34 8 12 8ZM18 12C18 15.31 15.31 18 12 18V16C14.21 16 16 14.21 16 12H18Z" fill="currentColor" />
+            </svg>
+            <span style={{ 
+              marginLeft: '8px', 
+              fontWeight: 'bold' 
+            }}>
+              FreestyleFiend
+            </span>
+          </div>
+        </Link>
+
+        <div>
+          {authState.isAuthenticated ? (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Link href="/profile" style={{ marginRight: '16px' }}>Profile</Link>
+              <button 
+                onClick={handleSignOut}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div>
+              <Link 
+                href="/signin"
+                style={{
+                  marginRight: '8px',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #444',
+                  cursor: 'pointer',
+                }}
+              >
+                Sign In
+              </Link>
+              <Link 
+                href="/signup"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  color: 'white',
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                }}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
+      </header>
       <main style={{ 
         minHeight: 'calc(100vh - 60px)', 
-        backgroundColor: '#4c1d95', 
+        backgroundColor: '#0f0f0f', 
         color: 'white',
         padding: '1rem',
         display: 'flex',
@@ -479,17 +711,92 @@ export default function VotePage() {
           }}>
             Vote on Freestyles
           </h1>
-          
           {!authState.isAuthenticated ? (
             <div style={{
               textAlign: 'center',
               padding: '3rem 0',
+              backgroundColor: 'rgba(147, 51, 234, 0.1)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(147, 51, 234, 0.2)',
             }}>
               <p style={{ marginBottom: '1rem' }}>Sign in to vote on freestyles</p>
-              <button
-                onClick={() => router.push(`/signin?redirect=${encodeURIComponent('/vote')}`)}
+              <Link 
+                href="/signin"
                 style={{
-                  backgroundColor: '#db2777', 
+                  backgroundColor: '#9333ea', 
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '0.375rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}
+              >
+                Sign In
+              </Link>
+            </div>
+          ) : loading ? (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '50vh',
+            }}>
+              <div style={{
+                width: '2rem',
+                height: '2rem',
+                border: '4px solid rgba(147, 51, 234, 0.3)',
+                borderRadius: '50%',
+                borderTopColor: '#9333ea',
+                animation: 'spin 1s linear infinite',
+              }}></div>
+            </div>
+          ) : error ? (
+            <div style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.2)', 
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              marginBottom: '1.5rem',
+              textAlign: 'center',
+              color: 'white',
+            }}>
+              {error}
+              {allRecordingsVoted && (
+                <div style={{ marginTop: '1rem' }}>
+                  <button
+                    onClick={() => loadVotePageData()}
+                    style={{
+                      backgroundColor: '#9333ea',
+                      color: 'white',
+                      border: 'none',
+                      padding: '0.75rem 1.5rem',
+                      borderRadius: '0.375rem',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                      marginTop: '0.5rem',
+                    }}
+                  >
+                    Refresh Recordings
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : recordings.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 0',
+              color: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(147, 51, 234, 0.1)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(147, 51, 234, 0.2)',
+            }}>
+              <p style={{ marginBottom: '1rem' }}>No recordings available for voting at this time.</p>
+              <Link 
+                href="/leaderboard"
+                style={{
+                  backgroundColor: '#9333ea', 
                   color: 'white',
                   border: 'none',
                   padding: '0.75rem 1.5rem',
@@ -498,321 +805,229 @@ export default function VotePage() {
                   cursor: 'pointer',
                 }}
               >
-                Sign In
-              </button>
+                View Leaderboard
+              </Link>
             </div>
-          ) : loading ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              padding: '3rem 0',
-            }}>
-              <div style={{
-                width: '2rem',
-                height: '2rem',
-                border: '4px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '50%',
-                borderTopColor: 'white',
-                animation: 'spin 1s linear infinite',
-              }}></div>
-            </div>
-          ) : error && !hasRecordings ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '2rem 1rem',
-              backgroundColor: 'rgba(31, 41, 55, 0.5)',
-              borderRadius: '0.5rem',
-            }}>
-              <p style={{ marginBottom: '1rem' }}>{error}</p>
-              <button
-                onClick={fetchRecordings}
-                style={{
-                  backgroundColor: '#db2777', 
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '0.375rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >
-                Try Again
-              </button>
-            </div>
-          ) : hasRecordings ? (
-            <div style={{
-              position: 'relative',
-              height: '500px',
-              width: '100%',
-            }}>
-              {/* Swipe indicators */}
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '2rem',
-                transform: 'translateY(-50%)',
-                opacity: swiping === 'left' ? 0.9 : 0,
-                transition: 'opacity 0.2s ease',
-                zIndex: 20,
-                backgroundColor: 'rgba(239, 68, 68, 0.9)',
-                borderRadius: '50%',
-                width: '3rem',
-                height: '3rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <span style={{ 
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                }}>✗</span>
-              </div>
-              
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                right: '2rem',
-                transform: 'translateY(-50%)',
-                opacity: swiping === 'right' ? 0.9 : 0,
-                transition: 'opacity 0.2s ease',
-                zIndex: 20,
-                backgroundColor: 'rgba(16, 185, 129, 0.9)',
-                borderRadius: '50%',
-                width: '3rem',
-                height: '3rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <span style={{ 
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                }}>✓</span>
-              </div>
-
-              {/* Card stack effect - show next card if available */}
-              {currentIndex < recordings.length - 1 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '10px',
-                  left: '0',
-                  right: '0',
-                  bottom: '0',
-                  backgroundColor: 'rgba(139, 92, 246, 0.3)',
-                  borderRadius: '1rem',
-                  transform: 'scale(0.95)',
-                  zIndex: 1,
-                }}></div>
-              )}
-              
-              {/* Current recording card */}
+          ) : (
+            <>
+              {/* Recording Card */}
               <div
                 ref={cardRef}
                 style={{
-                  position: 'absolute',
-                  top: '0',
-                  left: '0',
-                  right: '0',
-                  bottom: '0',
-                  backgroundColor: 'rgba(91, 33, 182, 0.8)',
-                  borderRadius: '1rem',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transform: `translateX(${swipePosition.x}px) translateY(${swipePosition.y}px) rotate(${cardRotation}deg)`,
-                  opacity: cardOpacity,
-                  transition: swiping === 'none' ? 'transform 0.5s ease, opacity 0.5s ease' : 'none',
-                  zIndex: 10,
-                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-                  cursor: 'grab',
+                  width: '100%',
+                  maxWidth: '100%',
+                  backgroundColor: 'rgba(17, 17, 17, 0.8)',
+                  borderRadius: '0.75rem',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  transform: `rotate(${swiping !== 'none' ? (swiping === 'left' ? Math.min(swipePosition.x * -0.05, 0) : Math.max(swipePosition.x * 0.05, 0)) : 0}deg) 
+                              translateX(${swiping !== 'none' ? swipePosition.x : 0}px)`,
+                  transition: swiping === 'none' ? 'all 0.3s ease-out' : 'none',
+                  border: '1px solid rgba(147, 51, 234, 0.2)',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
                 }}
                 onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseLeave}
                 onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
               >
-                {/* Placeholder Image */}
+                {/* Recording image */}
                 <div style={{
+                  height: '120px',
+                  backgroundColor: recordings[currentIndex] ? getPlaceholderImageForRecording(recordings[currentIndex].id).background : 'black',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   position: 'relative',
-                  width: '100%',
-                  height: '200px',
-                  borderRadius: '0.5rem',
-                  marginBottom: '1rem',
                   overflow: 'hidden',
                 }}>
                   <div style={{
-                    width: '100%',
-                    height: '100%',
-                    background: getPlaceholderImageForRecording(currentRecording.id).background,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '5rem',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    opacity: 0.15,
+                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                    backgroundSize: '10px 10px',
+                  }} />
+                  
+                  <span style={{
+                    fontSize: '3rem',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
                   }}>
-                    {/* Background pattern */}
+                    {recordings[currentIndex] && getPlaceholderImageForRecording(recordings[currentIndex].id).icon}
+                  </span>
+                  
+                  {/* Vote Overlay */}
+                  {swiping === 'left' && (
                     <div style={{
                       position: 'absolute',
                       top: 0,
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      opacity: 0.15,
-                      backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                      backgroundSize: '10px 10px',
-                    }} />
-                    
-                    {getPlaceholderImageForRecording(currentRecording.id).icon}
-                  </div>
+                      backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: Math.min(Math.abs(swipePosition.x) / 100, 1),
+                      transition: 'opacity 0.2s',
+                    }}>
+                      <span style={{ 
+                        fontSize: '2rem', 
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: '0 2px 5px rgba(0,0,0,0.3)',
+                      }}>NOPE</span>
+                    </div>
+                  )}
+                  
+                  {swiping === 'right' && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: Math.min(Math.abs(swipePosition.x) / 100, 1),
+                      transition: 'opacity 0.2s',
+                    }}>
+                      <span style={{ 
+                        fontSize: '2rem', 
+                        fontWeight: 'bold',
+                        color: 'white',
+                        textShadow: '0 2px 5px rgba(0,0,0,0.3)',
+                      }}>FIRE!</span>
+                    </div>
+                  )}
                 </div>
                 
-                {/* Recording details */}
-                <div style={{ marginBottom: '1rem' }}>
+                <div style={{ padding: '1.25rem' }}>
                   <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    marginBottom: '0.25rem',
+                    marginBottom: '0.5rem',
                   }}>
-                    <h2 style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 600,
-                      marginRight: '0.5rem',
+                    <h2 style={{ 
+                      fontSize: '1.25rem', 
+                      fontWeight: 'bold',
+                      margin: 0,
+                      flex: 1,
                     }}>
-                      {currentRecording.title}
+                      {recordings[currentIndex]?.title}
                     </h2>
-                    {currentRecording.explicit && (
+                    {recordings[currentIndex]?.explicit && (
                       <span style={{
-                        backgroundColor: 'rgba(219, 39, 119, 0.8)', 
+                        backgroundColor: 'rgba(147, 51, 234, 0.8)',
                         color: 'white',
                         padding: '0.125rem 0.375rem',
                         borderRadius: '0.25rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
+                        letterSpacing: '0.05em',
                       }}>
-                        E
+                        EXPLICIT
                       </span>
                     )}
                   </div>
-                  <p style={{
-                    fontSize: '1rem',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                  }}>
-                    by {currentRecording.artistName}
-                  </p>
-                </div>
-                
-                {/* Audio player */}
-                <div style={{ marginBottom: '1rem', flex: 1 }}>
-                  <AudioPlayer 
-                    src={currentRecording.audioUrl} 
-                    title={currentRecording.title}
-                    artist={currentRecording.artistName}
-                    onError={() => console.error(`Error loading audio for recording ${currentRecording.id}`)}
-                  />
-                </div>
-                
-                {/* Swipe instructions */}
-                <div style={{
-                  textAlign: 'center',
-                  fontSize: '0.875rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  marginTop: 'auto',
-                }}>
-                  <p>Swipe right to like, left to dislike, or use the buttons below</p>
-                </div>
-                
-                {/* Vote buttons for alternative interaction */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  marginTop: '1rem',
-                }}>
-                  <button
-                    onClick={() => handleVote(currentRecording.id, 'down')}
-                    disabled={loadingVote || isCurrentRecordingVoted}
-                    style={{
-                      backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                      width: '3.5rem',
-                      height: '3.5rem',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      border: 'none',
-                      cursor: loadingVote || isCurrentRecordingVoted ? 'default' : 'pointer',
-                      opacity: loadingVote || isCurrentRecordingVoted ? 0.5 : 1,
-                    }}
-                    aria-label="Dislike"
-                  >
-                    <span style={{ fontSize: '1.5rem' }}>✗</span>
-                  </button>
                   
-                  <button
-                    onClick={() => handleVote(currentRecording.id, 'up')}
-                    disabled={loadingVote || isCurrentRecordingVoted}
-                    style={{
-                      backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                      width: '3.5rem',
-                      height: '3.5rem',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      border: 'none',
-                      cursor: loadingVote || isCurrentRecordingVoted ? 'default' : 'pointer',
-                      opacity: loadingVote || isCurrentRecordingVoted ? 0.5 : 1,
-                    }}
-                    aria-label="Like"
-                  >
-                    <span style={{ fontSize: '1.5rem' }}>✓</span>
-                  </button>
+                  <p style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    marginBottom: '1rem',
+                  }}>
+                    by <span style={{ color: 'rgba(147, 51, 234, 0.8)' }}>{recordings[currentIndex]?.artistName}</span>
+                  </p>
+                  
+                  {/* Audio Player */}
+                  <AudioPlayer 
+                    src={recordings[currentIndex]?.audioUrl} 
+                    title={recordings[currentIndex]?.title || 'Untitled Recording'}
+                    artist={recordings[currentIndex]?.artistName || 'Unknown Artist'}
+                    onError={() => {}}
+                  />
+                  
+                  <div style={{
+                    marginTop: '1.5rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                  }}>
+                    <button
+                      onClick={() => handleVote(recordings[currentIndex].id, 'down')}
+                      disabled={loadingVote}
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'white',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        height: '3rem',
+                        borderRadius: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                      <span>Skip</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleVote(recordings[currentIndex].id, 'up')}
+                      disabled={loadingVote}
+                      style={{
+                        flex: 1,
+                        backgroundColor: '#9333ea',
+                        color: 'white',
+                        border: 'none',
+                        height: '3rem',
+                        borderRadius: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7e22ce'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9333ea'}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                      </svg>
+                      <span>Upvote</span>
+                    </button>
+                  </div>
                 </div>
               </div>
               
-              {/* Progress indicator */}
+              {/* Swipe Instruction */}
               <div style={{
-                position: 'absolute',
-                bottom: '-2rem',
-                left: '0',
-                right: '0',
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '0.5rem',
+                marginTop: '1rem',
+                textAlign: 'center',
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.875rem',
               }}>
-                {recordings.slice(0, Math.min(recordings.length, 5)).map((_, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      width: '0.5rem',
-                      height: '0.5rem',
-                      borderRadius: '50%',
-                      backgroundColor: i === currentIndex ? 'white' : 'rgba(255, 255, 255, 0.3)',
-                    }}
-                  />
-                ))}
-                {recordings.length > 5 && (
-                  <div style={{ 
-                    fontSize: '0.75rem', 
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    marginLeft: '0.25rem',
-                  }}>
-                    {currentIndex + 1}/{recordings.length}
-                  </div>
-                )}
+                <p>
+                  Swipe right to upvote, left to skip
+                </p>
+                <p style={{ fontSize: '0.75rem', marginTop: '0.25rem', color: 'rgba(255, 255, 255, 0.4)' }}>
+                  {currentIndex + 1} of {recordings.length} recordings
+                </p>
               </div>
-            </div>
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '3rem 0',
-              color: 'rgba(255, 255, 255, 0.7)',
-            }}>
-              <p style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>No freestyles found to vote on.</p>
-              <p>Check back later for new submissions!</p>
-            </div>
+            </>
           )}
         </div>
         
@@ -821,33 +1036,42 @@ export default function VotePage() {
           maxWidth: '480px',
           width: '100%',
           margin: '2rem auto 0',
-          padding: '1rem',
-          backgroundColor: 'rgba(76, 29, 149, 0.6)',
-          borderRadius: '0.5rem',
+          padding: '1.25rem',
+          backgroundColor: 'rgba(17, 17, 17, 0.8)',
+          borderRadius: '0.75rem',
+          border: '1px solid rgba(147, 51, 234, 0.2)',
+          boxSizing: 'border-box',
         }}>
           <h2 style={{
             fontSize: '1.25rem',
             fontWeight: 600,
-            marginBottom: '0.5rem',
+            marginBottom: '0.75rem',
+            color: 'white',
+            textAlign: 'center',
           }}>
             How to Vote
           </h2>
           <ul style={{
             listStyleType: 'disc',
-            paddingLeft: '1.25rem',
+            paddingLeft: '1.75rem',
+            paddingRight: '0.75rem',
             fontSize: '0.875rem',
             color: 'rgba(255, 255, 255, 0.8)',
+            margin: '0 auto',
+            lineHeight: '1.6',
           }}>
-            <li>Swipe right or tap ✓ to like a freestyle</li>
-            <li>Swipe left or tap ✗ to dislike a freestyle</li>
+            <li>Swipe right or tap <span style={{ color: '#9333ea' }}>↑</span> to like a freestyle</li>
+            <li>Swipe left or tap <span style={{ fontWeight: 'bold' }}>Skip</span> to dislike a freestyle</li>
             <li>Listen to the full recording before voting</li>
             <li>Top-rated freestyles appear on the leaderboard</li>
           </ul>
         </div>
       </main>
-      <style jsx>{`
+      
+      <style jsx global>{`
         @keyframes spin {
-          to { transform: rotate(360deg); }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </>
