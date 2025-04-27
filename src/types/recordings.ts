@@ -13,6 +13,8 @@ export interface Recording {
   audioUrl: string;
   votes: number;
   userVote?: 'up' | 'down' | null;
+  fireRating?: number;
+  playCount?: number;
 }
 
 export interface LeaderboardFilters {

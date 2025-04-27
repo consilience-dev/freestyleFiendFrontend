@@ -4,6 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema, SignUpFormData } from './schemas';
 import { signUp } from '@/lib/auth';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+
+// Import shadcn components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 /**
  * Sign Up form component with validation and error handling
@@ -68,256 +75,138 @@ export function SignUpForm() {
 
   if (isSuccess) {
     return (
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        padding: '2rem',
-        backgroundColor: 'rgba(79, 29, 127, 0.4)',
-        borderRadius: '0.5rem',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      }}>
-        <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1rem', textAlign: 'center' }}>
-          Account Created!
-        </h2>
-        <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '1.5rem', textAlign: 'center' }}>
-          Please check your email for a verification code to confirm your account.
-        </p>
-        <button
+      <div className="w-full max-w-md mx-auto">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold tracking-tight">Account Created!</h1>
+          <p className="text-muted-foreground mt-2">
+            Please check your email for a verification code to confirm your account.
+          </p>
+        </div>
+        
+        <Button 
           onClick={() => router.push('/confirm-signup')}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            border: 'none',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.375rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            width: '100%',
-            transition: 'background-color 0.2s',
-          }}
+          className="w-full bg-white text-black hover:bg-white/90 mt-4"
         >
           Verify Your Account
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div style={{
-      maxWidth: '400px',
-      margin: '0 auto',
-      padding: '2rem',
-      backgroundColor: 'rgba(79, 29, 127, 0.4)',
-      borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    }}>
-      <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1rem', textAlign: 'center' }}>
-        Create Your Account
-      </h2>
-      {serverError && (
-        <div style={{
-          backgroundColor: 'rgba(200, 30, 30, 0.2)',
-          color: '#FFBBBB',
-          padding: '0.75rem',
-          borderRadius: '0.375rem',
-          marginBottom: '1rem',
-          fontSize: '0.875rem',
-        }}>
-          {serverError}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label 
-            htmlFor="username" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
-          >
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            {...register('username')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.username ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Enter your username"
-          />
-          {errors.username && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.username.message}
-            </p>
+    <div className="w-full max-w-md mx-auto">
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Create an account</h1>
+        <p className="text-muted-foreground mt-1">
+          Enter your details below to create your account
+        </p>
+      </div>
+      
+      <div className="w-full">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {serverError && (
+            <div className="mb-4 bg-destructive/15 text-destructive px-4 py-3 rounded-md text-sm">
+              {serverError}
+            </div>
           )}
-        </div>
-
-        <div>
-          <label 
-            htmlFor="email" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            {...register('email')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.email ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Enter your email"
-          />
-          {errors.email && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label 
-            htmlFor="name" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
-          >
-            Full Name (optional)
-          </label>
-          <input
-            id="name"
-            type="text"
-            {...register('name')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.name ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Enter your full name"
-          />
-          {errors.name && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.name.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label 
-            htmlFor="password" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register('password')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.password ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Enter your password"
-          />
-          {errors.password && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label 
-            htmlFor="confirmPassword" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
-          >
-            Confirm Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            {...register('confirmPassword')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.confirmPassword ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Confirm your password"
-          />
-          {errors.confirmPassword && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            border: 'none',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.375rem',
-            fontWeight: 500,
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            width: '100%',
-            transition: 'background-color 0.2s',
-            opacity: isLoading ? 0.7 : 1,
-            marginTop: '0.5rem',
-          }}
-        >
-          {isLoading ? 'Creating Account...' : 'Sign Up'}
-        </button>
-      </form>
+          
+          <div className="space-y-4">
+            <div>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Username"
+                {...register('username')}
+                className={errors.username ? "border-destructive" : ""}
+                disabled={isLoading}
+              />
+              {errors.username && (
+                <p className="text-destructive text-xs mt-1">
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                {...register('email')}
+                className={errors.email ? "border-destructive" : ""}
+                disabled={isLoading}
+              />
+              {errors.email && (
+                <p className="text-destructive text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                {...register('password')}
+                className={errors.password ? "border-destructive" : ""}
+                disabled={isLoading}
+              />
+              {errors.password && (
+                <p className="text-destructive text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm password"
+                {...register('confirmPassword')}
+                className={errors.confirmPassword ? "border-destructive" : ""}
+                disabled={isLoading}
+              />
+              {errors.confirmPassword && (
+                <p className="text-destructive text-xs mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-white text-black hover:bg-white/90"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating account..." : "Sign Up with Email"}
+            </Button>
+          </div>
+          
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            By clicking continue, you agree to our{' '}
+            <Link href="/terms" className="text-primary underline-offset-4 hover:underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="text-primary underline-offset-4 hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </div>
+          
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <span>Already have an account?</span>{' '}
+            <Link
+              href="/signin"
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              Sign in
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

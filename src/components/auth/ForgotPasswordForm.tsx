@@ -5,6 +5,10 @@ import { forgotPasswordSchema, ForgotPasswordFormData } from './schemas';
 import { forgotPassword } from '@/lib/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 /**
  * Forgot Password form component with validation and error handling
@@ -54,159 +58,78 @@ export function ForgotPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        padding: '2rem',
-        backgroundColor: 'rgba(79, 29, 127, 0.4)',
-        borderRadius: '0.5rem',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      }}>
-        <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1rem', textAlign: 'center' }}>
-          Check Your Email
-        </h2>
-        <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '1.5rem', textAlign: 'center' }}>
-          If an account exists with this username, we've sent a code to your email with instructions to reset your password.
-        </p>
-        <Link href={`/reset-password?username=${username}`}
-          style={{
-            display: 'block',
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.375rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            width: '100%',
-            textAlign: 'center',
-            textDecoration: 'none',
-            transition: 'background-color 0.2s',
-          }}
-          onClick={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
-          }}
-        >
-          Reset Your Password
-        </Link>
-      </div>
+      <Card className="w-full max-w-md mx-auto bg-background/30 backdrop-blur border-border">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center font-bold">Check Your Email</CardTitle>
+          <CardDescription className="text-center">
+            If an account exists with this username, we've sent a code to your email with instructions to reset your password.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Link 
+            href={`/reset-password?username=${username}`}
+            className="block w-full bg-white text-black hover:bg-white/90 py-3 px-4 rounded-md font-medium text-center transition-colors"
+          >
+            Reset Your Password
+          </Link>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div style={{
-      maxWidth: '400px',
-      margin: '0 auto',
-      padding: '2rem',
-      backgroundColor: 'rgba(79, 29, 127, 0.4)',
-      borderRadius: '0.5rem',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    }}>
-      <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '1rem', textAlign: 'center' }}>
-        Forgot Password
-      </h2>
-      <p style={{ 
-        color: 'rgba(255, 255, 255, 0.8)', 
-        marginBottom: '1.5rem', 
-        textAlign: 'center',
-        fontSize: '0.875rem'
-      }}>
-        Enter your username and we'll send you a code to reset your password.
-      </p>
-      
-      {serverError && (
-        <div style={{
-          backgroundColor: 'rgba(200, 30, 30, 0.2)',
-          color: '#FFBBBB',
-          padding: '0.75rem',
-          borderRadius: '0.375rem',
-          marginBottom: '1rem',
-          fontSize: '0.875rem',
-        }}>
-          {serverError}
-        </div>
-      )}
+    <Card className="w-full max-w-md mx-auto bg-background/30 backdrop-blur border-border">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl text-center font-bold">Forgot Password</CardTitle>
+        <CardDescription className="text-center">
+          Enter your username and we'll send you a code to reset your password.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {serverError && (
+          <div className="bg-destructive/20 text-destructive-foreground px-4 py-3 rounded-md mb-4 text-sm">
+            {serverError}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <label 
-            htmlFor="username" 
-            style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem', 
-              color: 'white', 
-              fontSize: '0.875rem' 
-            }}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="username">
+              Username
+            </Label>
+            <Input
+              id="username"
+              type="text"
+              {...register('username')}
+              placeholder="Enter your username"
+              className={errors.username ? "border-destructive" : ""}
+            />
+            {errors.username && (
+              <p className="text-destructive text-xs mt-1">
+                {errors.username.message}
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-white text-black hover:bg-white/90 mt-2"
           >
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            {...register('username')}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              border: errors.username ? '1px solid #ff4d4d' : '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '0.875rem',
-            }}
-            placeholder="Enter your username"
-          />
-          {errors.username && (
-            <p style={{ color: '#ff4d4d', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-              {errors.username.message}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            border: 'none',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.375rem',
-            fontWeight: 500,
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            width: '100%',
-            transition: 'background-color 0.2s',
-            opacity: isLoading ? 0.7 : 1,
-            marginTop: '0.5rem',
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
-        >
-          {isLoading ? 'Sending...' : 'Send Reset Code'}
-        </button>
-      </form>
-
-      <div style={{ 
-        marginTop: '1.5rem',
-        textAlign: 'center',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: '0.875rem'
-      }}>
-        Remember your password?{' '}
-        <Link 
-          href="/signin" 
-          style={{ 
-            color: 'white',
-            textDecoration: 'none',
-            fontWeight: 500,
-          }}
-          onMouseOver={(e) => e.currentTarget.style.textDecoration = 'underline'}
-          onMouseOut={(e) => e.currentTarget.style.textDecoration = 'none'}
-        >
-          Sign in
-        </Link>
-      </div>
-    </div>
+            {isLoading ? 'Sending...' : 'Send Reset Code'}
+          </Button>
+          
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            Remember your password?{' '}
+            <Link 
+              href="/signin" 
+              className="text-foreground font-medium hover:underline"
+            >
+              Sign in
+            </Link>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

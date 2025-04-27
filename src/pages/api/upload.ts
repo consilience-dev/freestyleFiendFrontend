@@ -48,6 +48,13 @@ export default async function handler(
     };
     
     const { fields, files } = await parseForm();
+    
+    // Properly validate that the required fields and files exist before accessing them
+    if (!files.audioFile || !Array.isArray(files.audioFile) || files.audioFile.length === 0 ||
+        !fields.presignedUrl || !Array.isArray(fields.presignedUrl) || fields.presignedUrl.length === 0) {
+      return res.status(400).json({ message: 'Missing file or presigned URL' });
+    }
+    
     const audioFile = files.audioFile[0]; // Get the uploaded file
     const presignedUrl = fields.presignedUrl[0]; // Get the presigned URL
     
