@@ -407,7 +407,11 @@ export default function RecordPage() {
       
       // 7. Set up microphone input
       const constraints: MediaStreamConstraints = {
-        audio: isMobile ? true : {
+        audio: isMobile ? {
+          echoCancellation: true, // Enable echo cancellation on mobile
+          noiseSuppression: true, // Enable noise suppression on mobile
+          autoGainControl: true   // Enable auto gain on mobile
+        } : {
           deviceId: selectedAudioInput ? { exact: selectedAudioInput } : undefined,
           echoCancellation: false,
           noiseSuppression: false,
@@ -417,127 +421,183 @@ export default function RecordPage() {
       };
       
       console.log('Requesting microphone access with constraints:', constraints);
-      const micStream = await navigator.mediaDevices.getUserMedia(constraints);
-      engine.micStream = micStream;
-      
-      const micSource = context.createMediaStreamSource(micStream);
-      engine.micSource = micSource;
-      
-      // 8. Apply mono conversion if needed and connect microphone
-      if (forceMono && !isMobile) {
-        // Check if input is actually stereo
-        const micTrackSettings = micStream.getAudioTracks()[0].getSettings();
-        const channelCount = micTrackSettings.channelCount;
+      try {
+        // First check if we're in a secure context
+        if (!window.isSecureContext) {
+          throw new Error('Microphone access requires a secure context (HTTPS)');
+        }
         
-        if (channelCount === 2) {
-          console.log('Converting stereo mic input to mono');
-          const splitter = context.createChannelSplitter(2);
-          const merger = context.createChannelMerger(1);
+        // Check if the browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Your browser does not support audio recording');
+        }
+        
+        const micStream = await navigator.mediaDevices.getUserMedia(constraints);
+        engine.micStream = micStream;
+        
+        // Verify we actually got audio tracks
+        if (!micStream || micStream.getAudioTracks().length === 0) {
+          throw new Error('No audio track was obtained from your microphone');
+        }
+        
+        const micSource = context.createMediaStreamSource(micStream);
+        engine.micSource = micSource;
+        
+        // 8. Apply mono conversion if needed and connect microphone
+        if (forceMono && !isMobile) {
+          // Check if input is actually stereo
+          const micTrackSettings = micStream.getAudioTracks()[0].getSettings();
+          const channelCount = micTrackSettings.channelCount;
           
-          micSource.connect(splitter);
-          splitter.connect(merger, 0, 0); // Left -> mono
-          splitter.connect(merger, 1, 0); // Right -> mono
-          merger.connect(micGain);
+          if (channelCount === 2) {
+            console.log('Converting stereo mic input to mono');
+            const splitter = context.createChannelSplitter(2);
+            const merger = context.createChannelMerger(1);
+            
+            micSource.connect(splitter);
+            splitter.connect(merger, 0, 0); // Left -> mono
+            splitter.connect(merger, 1, 0); // Right -> mono
+            merger.connect(micGain);
+          } else {
+            console.log('Mic input is already mono, no conversion needed');
+            micSource.connect(micGain);
+          }
         } else {
-          console.log('Mic input is already mono, no conversion needed');
           micSource.connect(micGain);
         }
-      } else {
-        micSource.connect(micGain);
-      }
-      
-      // Connect mic to recorder
-      micGain.connect(destination);
-      
-      // Optionally connect mic to output for monitoring
-      if (monitorMic) {
-        micGain.connect(context.destination);
-        console.log('Microphone monitoring enabled');
-      }
-      
-      // 9. Create MediaRecorder with optimal settings
-      const mimeTypes = [
-        'audio/webm;codecs=opus',
-        'audio/webm',
-        'audio/ogg;codecs=opus',
-        'audio/ogg',
-        'audio/mp4'
-      ];
-      
-      // Find best supported format
-      let mimeType = '';
-      for (const type of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(type)) {
-          mimeType = type;
-          break;
-        }
-      }
-      
-      if (!mimeType) {
-        throw new Error('No supported recording MIME type found');
-      }
-      
-      console.log(`Using recording format: ${mimeType}`);
-      
-      const recorderOptions = {
-        mimeType,
-        audioBitsPerSecond: 128000
-      };
-      
-      const recorder = new MediaRecorder(destination.stream, recorderOptions);
-      engine.recorder = recorder;
-      engine.audioChunks = [];
-      
-      // Handle data from recorder
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          engine.audioChunks.push(event.data);
-        }
-      };
-      
-      // Handle recording completion
-      recorder.onstop = () => {
-        console.log('Recording stopped, processing audio...');
-        setRecordingState(prev => ({ ...prev, phase: 'processing' }));
         
-        try {
-          const audioBlob = new Blob(engine.audioChunks, { type: mimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          
-          console.log(`Recording processed: ${engine.audioChunks.length} chunks, blob size: ${audioBlob.size} bytes`);
-          
-          // Update state with the recording result
-          setRecordingState({
-            phase: 'ready',
-            duration: recordingState.duration,
-            audioBlob,
-            audioUrl,
-            error: null
-          });
-        } catch (err) {
-          console.error('Error processing recording:', err);
-          setRecordingState({
-            phase: 'inactive',
-            duration: 0,
-            audioBlob: null,
-            audioUrl: null,
-            error: 'Failed to process recording'
-          });
+        // Connect mic to recorder
+        micGain.connect(destination);
+        
+        // Optionally connect mic to output for monitoring
+        if (monitorMic) {
+          micGain.connect(context.destination);
+          console.log('Microphone monitoring enabled');
         }
-      };
-      
-      // Handle errors
-      recorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event);
-        setRecordingState(prev => ({
-          ...prev,
+        
+        // 9. Create MediaRecorder with optimal settings
+        const mimeTypes = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/ogg',
+          'audio/mp4'
+        ];
+        
+        // Find best supported format
+        let mimeType = '';
+        for (const type of mimeTypes) {
+          if (MediaRecorder.isTypeSupported(type)) {
+            mimeType = type;
+            break;
+          }
+        }
+        
+        if (!mimeType) {
+          throw new Error('No supported recording MIME type found');
+        }
+        
+        console.log(`Using recording format: ${mimeType}`);
+        
+        const recorderOptions = {
+          mimeType,
+          audioBitsPerSecond: 128000
+        };
+        
+        const recorder = new MediaRecorder(destination.stream, recorderOptions);
+        engine.recorder = recorder;
+        engine.audioChunks = [];
+        
+        // Handle data from recorder
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            engine.audioChunks.push(event.data);
+          }
+        };
+        
+        // Handle recording completion
+        recorder.onstop = () => {
+          console.log('Recording stopped, processing audio...');
+          setRecordingState(prev => ({ ...prev, phase: 'processing' }));
+          
+          try {
+            const audioBlob = new Blob(engine.audioChunks, { type: mimeType });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            console.log(`Recording processed: ${engine.audioChunks.length} chunks, blob size: ${audioBlob.size} bytes`);
+            
+            // Update state with the recording result
+            setRecordingState({
+              phase: 'ready',
+              duration: recordingState.duration,
+              audioBlob,
+              audioUrl,
+              error: null
+            });
+          } catch (err) {
+            console.error('Error processing recording:', err);
+            setRecordingState({
+              phase: 'inactive',
+              duration: 0,
+              audioBlob: null,
+              audioUrl: null,
+              error: 'Failed to process recording'
+            });
+          }
+        };
+        
+        // Handle errors
+        recorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+          setRecordingState(prev => ({
+            ...prev,
+            phase: 'inactive',
+            error: 'Recording error occurred'
+          }));
+        };
+        
+        console.log('Audio engine setup complete');
+        return true;
+      } catch (err) {
+        // Clean up partial setup on error
+        cleanupAudioEngine();
+        
+        const message = err instanceof Error ? err.message : 'Unknown setup error';
+        console.error('Audio engine setup failed:', message);
+        
+        // Provide more user-friendly error messages for common issues
+        let errorMessage = `Could not start recording: ${message}`;
+        
+        if (message.includes('permission') || message.includes('denied') || 
+            message.includes('NotAllowedError') || message.includes('not allowed')) {
+          errorMessage = 'Microphone access was denied. Please allow microphone permissions when prompted and reload the page.';
+          
+          // Additional mobile-specific guidance
+          if (isMobile) {
+            if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+              errorMessage += ' On iOS, make sure your browser has microphone permissions enabled in your device settings.';
+            } else if (/Android/.test(navigator.userAgent)) {
+              errorMessage += ' On Android, try tapping the lock/info icon in your address bar to update site permissions.';
+            }
+          }
+        } else if (message.includes('secure context') || message.includes('insecure')) {
+          errorMessage = 'Recording requires a secure connection (HTTPS). Please access this site using HTTPS.';
+        } else if (message.includes('support')) {
+          errorMessage = 'Your browser does not fully support audio recording features. Please try using Chrome, Safari, or Firefox.';
+        } else if (message.includes('getUserMedia') || message.includes('mediaDevices')) {
+          errorMessage = 'Your browser cannot access the microphone. Please ensure you have a microphone connected and try a different browser.';
+        }
+        
+        setRecordingState({
           phase: 'inactive',
-          error: 'Recording error occurred'
-        }));
-      };
-      
-      console.log('Audio engine setup complete');
-      return true;
+          duration: 0,
+          audioBlob: null,
+          audioUrl: null,
+          error: errorMessage
+        });
+        
+        return false;
+      }
     } catch (err) {
       // Clean up partial setup on error
       cleanupAudioEngine();
@@ -565,6 +625,38 @@ export default function RecordPage() {
     
     // First, clean up any previous recording
     cleanupAudioEngine();
+    
+    // Check if device has proper permission access first - especially important for iOS
+    try {
+      // This is a permission "pre-check" to give more specific error messages
+      if (navigator.permissions && navigator.permissions.query) {
+        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        
+        if (permissionStatus.state === 'denied') {
+          setRecordingState({
+            phase: 'inactive',
+            duration: 0,
+            audioBlob: null,
+            audioUrl: null,
+            error: 'Microphone access was denied. Please enable microphone permissions in your browser settings and reload the page.'
+          });
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.log('Permission check not supported, continuing with standard flow:', permErr);
+    }
+    
+    // Attempt to start audio context first to address Safari's requirement
+    // that audio contexts be created within a user gesture
+    try {
+      const tempContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      await tempContext.resume();
+      tempContext.close();
+    } catch (audioContextErr) {
+      console.error('Could not initialize audio context:', audioContextErr);
+      // Continue anyway - the main setup will handle errors
+    }
     
     // Set up audio engine from scratch
     const setupSuccess = await setupAudioEngine();
