@@ -645,72 +645,72 @@ export default function LeaderboardPage() {
                         
                         {/* Audio player bar */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          <button
-                            onClick={() => handlePlayRecording(recording.id)}
-                            style={{
-                              width: '2.5rem',
-                              height: '2.5rem',
-                              borderRadius: '50%',
-                              backgroundColor: playingRecordingId === recording.id 
-                                ? 'rgba(147, 51, 234, 0.9)' 
-                                : 'rgba(147, 51, 234, 0.6)',
-                              color: 'white',
-                              border: 'none',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              transition: 'background-color 0.2s',
-                              flexShrink: 0,
-                            }}
-                            aria-label={playingRecordingId === recording.id ? "Pause" : "Play"}
-                          >
-                            <svg 
-                              width="18" 
-                              height="18" 
-                              viewBox="0 0 24 24"
-                              fill="white"
-                            >
-                              {playingRecordingId === recording.id ? (
-                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                              ) : (
-                                <path d="M8 5v14l11-7z" />
-                              )}
-                            </svg>
-                          </button>
-                          
-                          {playingRecordingId === recording.id && (
-                            <div style={{ flex: 1, position: 'relative' }}>
-                              <AudioPlayer 
-                                src={recording.audioUrl} 
-                                title={recording.title}
-                                artist={recording.artistName}
-                                onError={() => setPlayingRecordingId(null)}
-                              />
-                            </div>
-                          )}
-                          
-                          {playingRecordingId !== recording.id && (
-                            <div style={{ 
-                              flex: 1,
-                              height: '4px',
-                              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                              borderRadius: '2px',
-                              position: 'relative',
-                            }}>
-                              <div style={{
-                                position: 'absolute',
-                                left: '0',
-                                top: '0',
-                                bottom: '0',
-                                width: '100%',
-                                pointerEvents: 'none',
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            flex: 1,
+                          }}>
+                            {/* Only show the play button when the recording is not currently playing */}
+                            {playingRecordingId !== recording.id && (
+                              <button
+                                onClick={() => handlePlayRecording(recording.id)}
+                                style={{
+                                  width: '2rem',
+                                  height: '2rem',
+                                  borderRadius: '9999px',
+                                  backgroundColor: '#9333ea',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  flexShrink: 0,
+                                  marginRight: '0.5rem',
+                                }}
+                                aria-label="Play"
+                              >
+                                <svg 
+                                  width="14" 
+                                  height="14" 
+                                  viewBox="0 0 24 24"
+                                  fill="white"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </button>
+                            )}
+                            
+                            {playingRecordingId === recording.id ? (
+                              <div style={{ flex: 1, position: 'relative' }}>
+                                <AudioPlayer 
+                                  src={recording.audioUrl} 
+                                  title={recording.title}
+                                  artist={recording.artistName}
+                                  onError={() => setPlayingRecordingId(null)}
+                                />
+                              </div>
+                            ) : (
+                              <div style={{ 
+                                flex: 1,
+                                height: '4px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
                                 borderRadius: '2px',
-                                opacity: '0.1',
-                                background: 'linear-gradient(to right, #9333ea, #4f46e5)',
-                              }} />
-                            </div>
-                          )}
+                                position: 'relative',
+                              }}>
+                                <div style={{
+                                  position: 'absolute',
+                                  left: '0',
+                                  top: '0',
+                                  bottom: '0',
+                                  width: '100%',
+                                  pointerEvents: 'none',
+                                  borderRadius: '2px',
+                                  opacity: '0.1',
+                                  background: 'linear-gradient(to right, #9333ea, #4f46e5)',
+                                }} />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       
