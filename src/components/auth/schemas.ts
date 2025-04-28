@@ -21,7 +21,7 @@ export const signUpSchema = z.object({
       message: 'Password must contain at least one special character' 
     }),
   confirmPassword: z.string(),
-  name: z.string().optional(),
+  name: z.string().min(1, { message: 'Full name is required' }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],

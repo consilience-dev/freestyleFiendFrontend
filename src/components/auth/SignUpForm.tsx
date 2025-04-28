@@ -75,17 +75,26 @@ export function SignUpForm() {
 
   if (isSuccess) {
     return (
-      <div className="w-full max-w-md mx-auto">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold tracking-tight">Account Created!</h1>
-          <p className="text-muted-foreground mt-2">
+      <div style={{ width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>Account Created!</h1>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.7)', marginTop: '0.5rem' }}>
             Please check your email for a verification code to confirm your account.
           </p>
         </div>
         
         <Button 
           onClick={() => router.push('/confirm-signup')}
-          className="w-full bg-white text-black hover:bg-white/90 mt-4"
+          style={{ 
+            width: '100%', 
+            backgroundColor: '#9333ea', 
+            color: '#fff', 
+            padding: '0.75rem 1rem', 
+            borderRadius: '0.375rem', 
+            fontSize: '0.875rem', 
+            cursor: 'pointer',
+            border: 'none'
+          }}
         >
           Verify Your Account
         </Button>
@@ -94,119 +103,223 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Create an account</h1>
-        <p className="text-muted-foreground mt-1">
-          Enter your details below to create your account
-        </p>
-      </div>
-      
-      <div className="w-full">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {serverError && (
-            <div className="mb-4 bg-destructive/15 text-destructive px-4 py-3 rounded-md text-sm">
-              {serverError}
-            </div>
-          )}
-          
-          <div className="space-y-4">
-            <div>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Username"
-                {...register('username')}
-                className={errors.username ? "border-destructive" : ""}
-                disabled={isLoading}
-              />
-              {errors.username && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.username.message}
-                </p>
-              )}
-            </div>
-            
-            <div>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                {...register('email')}
-                className={errors.email ? "border-destructive" : ""}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-            
-            <div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                {...register('password')}
-                className={errors.password ? "border-destructive" : ""}
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            
-            <div>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                {...register('confirmPassword')}
-                className={errors.confirmPassword ? "border-destructive" : ""}
-                disabled={isLoading}
-              />
-              {errors.confirmPassword && (
-                <p className="text-destructive text-xs mt-1">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-white text-black hover:bg-white/90"
+    <div style={{ width: '100%' }}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {serverError && (
+          <div style={{
+            marginBottom: '1rem',
+            backgroundColor: 'rgba(220, 38, 38, 0.15)',
+            color: 'rgb(220, 38, 38)',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}>
+            {serverError}
+          </div>
+        )}
+        
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '1rem' }}>
+            <Input
+              id="username"
+              type="text"
+              placeholder="Username"
+              {...register('username')}
+              style={{ 
+                width: '100%', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '0.375rem', 
+                fontSize: '0.875rem', 
+                border: errors.username ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                color: '#fff',
+                boxSizing: 'border-box',
+                margin: '0 0 0.5rem 0'
+              }}
               disabled={isLoading}
-            >
-              {isLoading ? "Creating account..." : "Sign Up with Email"}
-            </Button>
+            />
+            {errors.username && (
+              <p style={{
+                color: 'rgb(220, 38, 38)',
+                fontSize: '0.75rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {errors.username.message}
+              </p>
+            )}
           </div>
           
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            By clicking continue, you agree to our{' '}
-            <Link href="/terms" className="text-primary underline-offset-4 hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-primary underline-offset-4 hover:underline">
-              Privacy Policy
-            </Link>
-            .
+          <div style={{ marginBottom: '1rem' }}>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Full Name"
+              {...register('name')}
+              style={{ 
+                width: '100%', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '0.375rem', 
+                fontSize: '0.875rem', 
+                border: errors.name ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                color: '#fff',
+                boxSizing: 'border-box',
+                margin: '0 0 0.5rem 0'
+              }}
+              disabled={isLoading}
+            />
+            {errors.name && (
+              <p style={{
+                color: 'rgb(220, 38, 38)',
+                fontSize: '0.75rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {errors.name.message}
+              </p>
+            )}
           </div>
           
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <span>Already have an account?</span>{' '}
-            <Link
-              href="/signin"
-              className="text-primary underline-offset-4 hover:underline"
-            >
-              Sign in
-            </Link>
+          <div style={{ marginBottom: '1rem' }}>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Email address"
+              {...register('email')}
+              style={{ 
+                width: '100%', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '0.375rem', 
+                fontSize: '0.875rem', 
+                border: errors.email ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                color: '#fff',
+                boxSizing: 'border-box',
+                margin: '0 0 0.5rem 0'
+              }}
+              disabled={isLoading}
+            />
+            {errors.email && (
+              <p style={{
+                color: 'rgb(220, 38, 38)',
+                fontSize: '0.75rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {errors.email.message}
+              </p>
+            )}
           </div>
-        </form>
-      </div>
+          
+          <div style={{ marginBottom: '1rem' }}>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Password"
+              {...register('password')}
+              style={{ 
+                width: '100%', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '0.375rem', 
+                fontSize: '0.875rem', 
+                border: errors.password ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                color: '#fff',
+                boxSizing: 'border-box',
+                margin: '0 0 0.5rem 0'
+              }}
+              disabled={isLoading}
+            />
+            {errors.password && (
+              <p style={{
+                color: 'rgb(220, 38, 38)',
+                fontSize: '0.75rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+          
+          <div style={{ marginBottom: '1rem' }}>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm password"
+              {...register('confirmPassword')}
+              style={{ 
+                width: '100%', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '0.375rem', 
+                fontSize: '0.875rem', 
+                border: errors.confirmPassword ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+                color: '#fff',
+                boxSizing: 'border-box',
+                margin: '0 0 0.5rem 0'
+              }}
+              disabled={isLoading}
+            />
+            {errors.confirmPassword && (
+              <p style={{
+                color: 'rgb(220, 38, 38)',
+                fontSize: '0.75rem',
+                margin: '0.25rem 0 0 0'
+              }}>
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+          
+          <Button 
+            type="submit" 
+            style={{ 
+              width: '100%', 
+              backgroundColor: '#9333ea', 
+              color: '#fff', 
+              padding: '0.75rem 1rem', 
+              borderRadius: '0.375rem', 
+              fontSize: '0.875rem', 
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? '0.7' : '1',
+              border: 'none'
+            }}
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating account..." : "Sign Up with Email"}
+          </Button>
+        </div>
+        
+        <div style={{
+          marginTop: '1rem',
+          textAlign: 'center',
+          fontSize: '0.75rem',
+          color: 'rgba(255, 255, 255, 0.7)'
+        }}>
+          By clicking continue, you agree to our{' '}
+          <Link href="/terms" style={{ color: '#9333ea', textDecoration: 'underline' }}>
+            Terms of Service
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" style={{ color: '#9333ea', textDecoration: 'underline' }}>
+            Privacy Policy
+          </Link>
+          .
+        </div>
+        
+        <div style={{
+          marginTop: '1.5rem',
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          color: 'rgba(255, 255, 255, 0.7)'
+        }}>
+          <span>Already have an account?</span>{' '}
+          <Link
+            href="/signin"
+            style={{ color: '#9333ea', textDecoration: 'underline' }}
+          >
+            Sign in
+          </Link>
+        </div>
+      </form>
     </div>
   );
 }

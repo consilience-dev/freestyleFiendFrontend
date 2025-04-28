@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { confirmSignUpSchema, ConfirmSignUpFormData } from './schemas';
 import { confirmSignUp } from '@/lib/auth';
 import { useRouter } from 'next/router';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -68,68 +67,120 @@ export function ConfirmSignUpForm({ username: initialUsername, onSuccess }: Conf
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto bg-background/30 backdrop-blur border-border">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center font-bold">Confirm Account</CardTitle>
-        <CardDescription className="text-center">
-          Enter the verification code sent to your email
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {serverError && (
-          <div className="bg-destructive/20 text-destructive-foreground px-4 py-3 rounded-md mb-4 text-sm">
-            {serverError}
-          </div>
-        )}
+    <div style={{ width: '100%', backgroundColor: '#0f0f0f', padding: '2rem' }}>
+      {serverError && (
+        <div style={{
+          marginBottom: '1rem',
+          backgroundColor: 'rgba(220, 38, 38, 0.15)',
+          color: 'rgb(220, 38, 38)',
+          padding: '0.75rem 1rem',
+          borderRadius: '0.375rem',
+          fontSize: '0.875rem'
+        }}>
+          {serverError}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">
-              Username
-            </Label>
-            <Input
-              id="username"
-              type="text"
-              {...register('username')}
-              disabled={!!initialUsername || !!router.query.username}
-              placeholder="Enter your username"
-              className={errors.username ? "border-destructive" : ""}
-            />
-            {errors.username && (
-              <p className="text-destructive text-xs mt-1">
-                {errors.username.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="code">
-              Confirmation Code
-            </Label>
-            <Input
-              id="code"
-              type="text"
-              {...register('code')}
-              placeholder="Enter 6-digit code"
-              maxLength={6}
-              className={`tracking-widest ${errors.code ? "border-destructive" : ""}`}
-            />
-            {errors.code && (
-              <p className="text-destructive text-xs mt-1">
-                {errors.code.message}
-              </p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-white text-black hover:bg-white/90 mt-2"
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div style={{ marginBottom: '1rem' }}>
+          <label 
+            htmlFor="username" 
+            style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem', 
+              fontSize: '0.875rem',
+              color: 'rgba(255, 255, 255, 0.7)'
+            }}
           >
-            {isLoading ? 'Verifying...' : 'Verify Account'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            Username
+          </label>
+          <Input
+            id="username"
+            type="text"
+            {...register('username')}
+            disabled={!!initialUsername || !!router.query.username}
+            placeholder="Enter your username"
+            style={{ 
+              width: '100%', 
+              padding: '0.75rem 1rem', 
+              borderRadius: '0.375rem', 
+              fontSize: '0.875rem', 
+              border: errors.username ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+              backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+              color: '#fff',
+              boxSizing: 'border-box',
+              margin: '0 0 0.5rem 0'
+            }}
+          />
+          {errors.username && (
+            <p style={{
+              color: 'rgb(220, 38, 38)',
+              fontSize: '0.75rem',
+              margin: '0.25rem 0 0.75rem 0'
+            }}>
+              {errors.username.message}
+            </p>
+          )}
+        </div>
+
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label 
+            htmlFor="code" 
+            style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem', 
+              fontSize: '0.875rem',
+              color: 'rgba(255, 255, 255, 0.7)'
+            }}
+          >
+            Confirmation Code
+          </label>
+          <Input
+            id="code"
+            type="text"
+            {...register('code')}
+            placeholder="Enter 6-digit code"
+            style={{ 
+              width: '100%', 
+              padding: '0.75rem 1rem', 
+              borderRadius: '0.375rem', 
+              fontSize: '0.875rem', 
+              border: errors.code ? '1px solid rgb(220, 38, 38)' : '1px solid rgba(255, 255, 255, 0.2)', 
+              backgroundColor: 'rgba(17, 17, 17, 0.8)', 
+              color: '#fff',
+              boxSizing: 'border-box',
+              margin: '0 0 0.5rem 0'
+            }}
+          />
+          {errors.code && (
+            <p style={{
+              color: 'rgb(220, 38, 38)',
+              fontSize: '0.75rem',
+              margin: '0.25rem 0 0 0'
+            }}>
+              {errors.code.message}
+            </p>
+          )}
+        </div>
+
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          style={{ 
+            width: '100%', 
+            backgroundColor: '#9333ea', 
+            color: '#fff', 
+            padding: '0.75rem 1rem', 
+            borderRadius: '0.375rem', 
+            fontSize: '0.875rem', 
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            opacity: isLoading ? '0.7' : '1',
+            border: 'none'
+          }}
+        >
+          {isLoading ? "Verifying..." : "Verify Account"}
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -11,9 +11,10 @@ export default function SignUpPage() {
       <Head>
         <title>Create an account - FreestyleFiend</title>
         <meta name="description" content="Create a new FreestyleFiend account" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>{`
           body {
-            background-color: #000;
+            background-color: #0f0f0f;
             color: #fff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
@@ -24,16 +25,66 @@ export default function SignUpPage() {
             color: inherit;
             text-decoration: none;
           }
+
+          /* Fix for input styling */
+          input {
+            background-color: rgba(17, 17, 17, 0.8) !important;
+            color: white !important;
+            border: 1px solid rgba(147, 51, 234, 0.3) !important;
+            border-radius: 0.375rem !important;
+            padding: 0.75rem !important;
+            width: 100% !important;
+            font-size: 1rem !important;
+            box-sizing: border-box !important;
+            margin-bottom: 0.75rem !important;
+          }
+          
+          input:focus {
+            outline: none !important;
+            border-color: #9333ea !important;
+            box-shadow: 0 0 0 1px #9333ea !important;
+          }
+
+          button {
+            background-color: #9333ea !important;
+            border: none !important;
+            color: white !important;
+            padding: 0.75rem 1.5rem !important;
+            font-weight: 500 !important;
+            border-radius: 0.375rem !important;
+            width: 100% !important;
+            cursor: pointer !important;
+            font-size: 1rem !important;
+            margin-top: 0.75rem !important;
+          }
+
+          button:hover {
+            background-color: #7e22ce !important;
+          }
+
+          button:disabled {
+            opacity: 0.7 !important;
+            cursor: not-allowed !important;
+          }
         `}</style>
       </Head>
 
-      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0' }}>
+      <div style={{ 
+        maxWidth: '100%', 
+        margin: '0 auto', 
+        padding: '0',
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         {/* Header */}
         <header style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
-          padding: '16px 20px' 
+          padding: '16px 20px', 
+          backgroundColor: '#0f0f0f',
+          color: '#fff'
         }}>
           <Link href="/">
             <div style={{ 
@@ -63,11 +114,32 @@ export default function SignUpPage() {
           flexDirection: 'column', 
           alignItems: 'center', 
           justifyContent: 'center', 
-          padding: '0 20px', 
-          marginTop: '60px',
-          height: 'calc(100vh - 180px)'
+          padding: '20px', 
+          flex: '1'
         }}>
-          <SignUpForm />
+          <div style={{
+            width: '100%',
+            maxWidth: '400px',
+            margin: '0 auto',
+          }}>
+            <h1 style={{
+              fontSize: '1.875rem',
+              fontWeight: 700,
+              textAlign: 'center',
+              marginBottom: '1rem',
+            }}>
+              Create an account
+            </h1>
+            <p style={{
+              fontSize: '0.875rem',
+              textAlign: 'center',
+              marginBottom: '2rem',
+              color: 'rgba(255, 255, 255, 0.7)',
+            }}>
+              Enter your details below to create your account
+            </p>
+            <SignUpForm />
+          </div>
         </main>
       </div>
     </>
