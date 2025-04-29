@@ -154,7 +154,7 @@ export default function VotePage() {
       const queryParams = new URLSearchParams();
       queryParams.append('timeFrame', 'week');
       queryParams.append('limit', '50'); // Fetch more to account for filtering
-      queryParams.append('randomize', 'true');
+      queryParams.append('randomize', 'true'); // Request randomization from backend for diversity
 
       const response = await fetch(`/api/leaderboard?${queryParams.toString()}`);
       
@@ -180,7 +180,16 @@ export default function VotePage() {
       if (filteredRecordings.length === 0) {
         setAllRecordingsVoted(true);
       } else {
-        setRecordings(filteredRecordings);
+        // Apply Fisher-Yates shuffle algorithm to ensure true randomization on the client side
+        // This guarantees a different order every time, independent of the backend
+        const shuffledRecordings = [...filteredRecordings];
+        for (let i = shuffledRecordings.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledRecordings[i], shuffledRecordings[j]] = [shuffledRecordings[j], shuffledRecordings[i]];
+        }
+        console.log('Shuffled recordings in a random order');
+        
+        setRecordings(shuffledRecordings);
         setCurrentIndex(0); // Reset to first recording
       }
     } catch (err) {
