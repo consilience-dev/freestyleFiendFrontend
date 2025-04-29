@@ -96,7 +96,14 @@ export default function LeaderboardPage() {
       }
 
       const data = await response.json();
-      setRecordings(data);
+      
+      // Sort recordings by fireRating in descending order
+      const sortedRecordings = [...data].sort((a, b) => {
+        // Sort by fireRating (descending)
+        return b.fireRating - a.fireRating;
+      });
+      
+      setRecordings(sortedRecordings);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
       setError('Failed to load leaderboard. Please try again later.');
@@ -531,12 +538,14 @@ export default function LeaderboardPage() {
                         </div>
                         
                         {/* Vote count badge - show at top right corner */}
-                        {recording.votes > 0 && (
+                        {recording.fireRating !== undefined && (
                           <div style={{
                             position: 'absolute',
                             top: '-8px',
                             right: '-8px',
-                            backgroundColor: recording.votes > 5 ? '#10b981' : '#f59e0b',
+                            backgroundColor: recording.fireRating > 3 ? '#10b981' : 
+                                             recording.fireRating > 0 ? '#f59e0b' : 
+                                             recording.fireRating < 0 ? '#ef4444' : '#6b7280',
                             color: 'white',
                             borderRadius: '50%',
                             width: '1.5rem',
@@ -550,7 +559,7 @@ export default function LeaderboardPage() {
                             border: '2px solid rgba(255,255,255,0.7)',
                             zIndex: 2,
                           }}>
-                            {recording.votes}
+                            {recording.fireRating}
                           </div>
                         )}
                         
@@ -724,7 +733,7 @@ export default function LeaderboardPage() {
                         marginTop: isMobile ? '1rem' : '0',
                         alignSelf: isMobile ? 'flex-end' : 'center',
                       }}>
-                        {recording.votes >= 0 ? (
+                        {recording.fireRating >= 0 ? (
                           <svg 
                             viewBox="0 0 24 24" 
                             width="24" 
@@ -760,9 +769,9 @@ export default function LeaderboardPage() {
                         <span style={{ 
                           fontSize: '1rem', 
                           fontWeight: 'bold',
-                          color: recording.votes > 0 ? '#9333ea' : recording.votes < 0 ? '#ef4444' : 'rgba(255, 255, 255, 0.5)',
+                          color: recording.fireRating > 0 ? '#9333ea' : recording.fireRating < 0 ? '#ef4444' : 'rgba(255, 255, 255, 0.5)',
                         }}>
-                          {Math.abs(recording.votes)}
+                          {Math.abs(recording.fireRating)}
                         </span>
                       </div>
                     </div>
