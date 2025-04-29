@@ -6,6 +6,7 @@ import { Recording, LeaderboardFilters } from '@/types/recordings';
 import { useAuth, signOut } from '@/lib/auth';
 import AudioPlayer from '@/components/AudioPlayer';
 import Link from 'next/link';
+import ContentDisclaimer from '@/components/ContentDisclaimer';
 
 // Array of vibrant gradient backgrounds for placeholder images
 const PLACEHOLDER_BACKGROUNDS = [
@@ -154,6 +155,9 @@ export default function LeaderboardPage() {
           }
         `}</style>
       </Head>
+      
+      {/* Content disclaimer */}
+      <ContentDisclaimer pageType="leaderboard" />
       
       {/* Custom Header */}
       <header style={{ 

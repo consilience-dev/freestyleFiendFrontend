@@ -7,6 +7,7 @@ import { getAccessToken } from '@/lib/auth';
 import { signOut } from 'aws-amplify/auth';
 import AudioPlayer from '@/components/AudioPlayer';
 import Link from 'next/link';
+import ContentDisclaimer from '@/components/ContentDisclaimer';
 
 // Reuse the same placeholder generation logic from leaderboard.tsx
 const PLACEHOLDER_BACKGROUNDS = [
@@ -653,6 +654,11 @@ export default function VotePage() {
           }
         `}</style>
       </Head>
+      
+      {/* Content disclaimer */}
+      <ContentDisclaimer pageType="vote" />
+
+      {/* Custom Header */}
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
