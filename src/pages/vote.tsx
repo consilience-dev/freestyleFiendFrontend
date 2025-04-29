@@ -286,6 +286,10 @@ export default function VotePage() {
         return newSet;
       });
       
+      // Reset UI state
+      setSwiping('none');
+      setSwipePosition({ x: 0, y: 0 });
+      
       // Move to the next recording after voting
       goToNextRecording();
     } catch (err) {
@@ -293,8 +297,20 @@ export default function VotePage() {
       setError('Failed to submit your vote. Please try again.');
     } finally {
       setLoadingVote(false);
+      
+      // Important: Reset the UI state to ensure the swipe animation is reset
       setSwiping('none');
       setSwipePosition({ x: 0, y: 0 });
+      
+      // Reset card styling to ensure it's ready for the next record
+      const card = cardRef.current;
+      if (card) {
+        // Use a short timeout to ensure this happens after state updates
+        setTimeout(() => {
+          card.style.transition = 'none';
+          card.style.transform = 'translateX(0) rotate(0deg)';
+        }, 50);
+      }
     }
   };
 

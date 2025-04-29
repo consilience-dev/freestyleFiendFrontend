@@ -413,9 +413,9 @@ export default function RecordPage() {
           autoGainControl: true   // Enable auto gain on mobile
         } : {
           deviceId: selectedAudioInput ? { exact: selectedAudioInput } : undefined,
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false
+          echoCancellation: true, // Enable echo cancellation always to reduce slapback
+          noiseSuppression: true, // Enable noise suppression to improve quality
+          autoGainControl: true   // Help maintain consistent levels
         },
         video: false
       };
@@ -1043,7 +1043,46 @@ export default function RecordPage() {
 
           {!selectedBeat ? (
             // Step 1: Select a beat
-            <BeatsGallery onSelectBeat={handleSelectBeat} />
+            <div style={{ marginBottom: '1rem' }}>
+              <h2 style={{ 
+                fontSize: '1.5rem', 
+                fontWeight: 'bold',
+                marginBottom: '0.5rem',
+                color: '#9333ea'
+              }}>
+                Choose a Beat to Freestyle Over
+              </h2>
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
+              }}>
+                Select a beat from our gallery, then record your freestyle over it.
+              </p>
+              
+              {/* Headphones recommendation notice */}
+              <div style={{
+                backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                border: '1px solid rgba(147, 51, 234, 0.3)',
+                borderRadius: '0.375rem',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: '20px', color: '#9333ea' }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p style={{ fontSize: '0.875rem', margin: 0 }}>
+                  <strong>Pro tip:</strong> For best quality recordings without echo, please use headphones. 
+                  This prevents the beat from being recorded twice.
+                </p>
+              </div>
+              <BeatsGallery onSelectBeat={handleSelectBeat} />
+            </div>
           ) : (
             // Step 2: Recording interface
             <div style={{
