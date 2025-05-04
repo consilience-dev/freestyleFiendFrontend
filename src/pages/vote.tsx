@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { getAccessToken } from '@/lib/auth';
 import { signOut } from 'aws-amplify/auth';
 import AudioPlayer from '@/components/AudioPlayer';
+import PlayCounter from '@/components/PlayCounter';
 import Link from 'next/link';
 import ContentDisclaimer from '@/components/ContentDisclaimer';
 
@@ -1034,7 +1035,13 @@ export default function VotePage() {
                     src={recordings[currentIndex]?.audioUrl} 
                     title={recordings[currentIndex]?.title || 'Untitled Recording'}
                     artist={recordings[currentIndex]?.artistName || 'Unknown Artist'}
+                    recordingId={recordings[currentIndex]?.id}
                     onError={() => {}}
+                  />
+                  
+                  {/* Play Counter */}
+                  <PlayCounter 
+                    recordingId={recordings[currentIndex]?.id}
                   />
                   
                   <div style={{

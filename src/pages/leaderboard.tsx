@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Recording, LeaderboardFilters } from '@/types/recordings';
 import { useAuth, signOut } from '@/lib/auth';
 import AudioPlayer from '@/components/AudioPlayer';
+import PlayCounter from '@/components/PlayCounter';
 import Link from 'next/link';
 import ContentDisclaimer from '@/components/ContentDisclaimer';
 
@@ -650,11 +651,16 @@ export default function LeaderboardPage() {
                         <p style={{
                           fontSize: '0.875rem',
                           color: 'rgba(255, 255, 255, 0.7)',
-                          marginBottom: '0.75rem',
+                          marginBottom: '0.25rem',
                         }}>
                           by <span style={{ color: 'rgba(147, 51, 234, 0.8)' }}>{recording.artistName}</span>
                           {recording.beatName && <span> • Beat: {recording.beatName}</span>}
                         </p>
+                        
+                        {/* Play count display */}
+                        <div style={{ marginBottom: '0.75rem' }}>
+                          <PlayCounter recordingId={recording.id} />
+                        </div>
                         
                         {/* Audio player bar */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -699,6 +705,7 @@ export default function LeaderboardPage() {
                                   src={recording.audioUrl} 
                                   title={recording.title}
                                   artist={recording.artistName}
+                                  recordingId={recording.id}
                                   onError={() => setPlayingRecordingId(null)}
                                 />
                               </div>
@@ -785,19 +792,19 @@ export default function LeaderboardPage() {
             </div>
           )}
         </div>
-      </main>
-      
-      <style jsx global>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
         
-        @keyframes fadeIn {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-      `}</style>
+        <style jsx global>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          
+          @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+        `}</style>
+      </main>
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { incrementPlayCount } from '@/lib/apiClient';
 
 interface AudioPlayerProps {
   src: string;
@@ -6,15 +7,17 @@ interface AudioPlayerProps {
   artist: string;
   onError?: () => void;
   className?: string;
+  recordingId?: string; // Optional to maintain backward compatibility
 }
 
-export default function AudioPlayer({ src, title, artist, onError, className = '' }: AudioPlayerProps) {
+export default function AudioPlayer({ src, title, artist, onError, className = '', recordingId }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [playCountIncremented, setPlayCountIncremented] = useState(false);
 
   // Load audio metadata when src changes
   useEffect(() => {
@@ -23,6 +26,7 @@ export default function AudioPlayer({ src, title, artist, onError, className = '
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
+    setPlayCountIncremented(false);
   }, [src]);
 
   const handlePlay = () => {
@@ -95,6 +99,21 @@ export default function AudioPlayer({ src, title, artist, onError, className = '
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  // Handle play start and increment play count
+  const handlePlayStart = async () => {
+    setIsPlaying(true);
+    // Only increment play count once per audio load
+    if (recordingId && !playCountIncremented) {
+      try {
+        await incrementPlayCount(recordingId);
+        setPlayCountIncremented(true);
+      } catch (err) {
+        // Log error but don't block playback
+        console.error('Failed to increment play count:', err);
+      }
+    }
+  };
+
   return (
     <div style={{
       display: 'flex',
@@ -108,7 +127,7 @@ export default function AudioPlayer({ src, title, artist, onError, className = '
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
         onError={handleError}
-        onPlay={() => setIsPlaying(true)}
+        onPlay={handlePlayStart}
         onPause={() => setIsPlaying(false)}
         preload="metadata"
       />
