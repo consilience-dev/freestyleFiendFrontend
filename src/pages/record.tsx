@@ -413,9 +413,9 @@ export default function RecordPage() {
           autoGainControl: true   // Enable auto gain on mobile
         } : {
           deviceId: selectedAudioInput ? { exact: selectedAudioInput } : undefined,
-          echoCancellation: true, // Enable echo cancellation always to reduce slapback
-          noiseSuppression: true, // Enable noise suppression to improve quality
-          autoGainControl: true   // Help maintain consistent levels
+          echoCancellation: false, // Disable echo cancellation
+          noiseSuppression: false, // Disable noise suppression
+          autoGainControl: false   // Disable auto gain control
         },
         video: false
       };
