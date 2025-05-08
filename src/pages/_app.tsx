@@ -4,6 +4,7 @@ import Head from "next/head";
 import { Inter as FontSans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { useRouter } from "next/router";
+import { Analytics } from "@vercel/analytics/next";
 
 import "@/styles/globals.css"; 
 
@@ -39,6 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <div className="flex-1">
               <Component {...pageProps} />
             </div>
+            <Analytics />
           </div>
         </AuthProvider>
       </div>
